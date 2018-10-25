@@ -18,21 +18,19 @@ language.
     - Thinking of how to implement each step and component of the game
     - Beginning pseudocode and game layout
 ### **November 5th:** Completing pseudocode and mapping out the layout of the game
-    - Determining and constructing the methods and classes we would need for the
-implementation of the game and interface layout
-     -Understanding how to create a connection between two players and updating the
-game
+    - Determining and constructing the methods and classes we would need for the implementation of the game and interface layout
+     -Understanding how to create a connection between two players and updating the game
 ### **November 12th**
-th: Beginning to program the game’s several per-player steps
+    - Beginning to program the game’s several per-player steps
     - Using a Bag ADT to get random letters
     - Designing how a player will enter a word and check if the word is in the dictionary
-    - Implementing a score field and relevant methods to keep track of both players’
-score
+    - Implementing a score field and relevant methods to keep track of both players’ score
 ### **November 19th:** Continuing to develop the game and beginning testing
     - Finishing up all steps and fixing errors spotted in the program (debugging tool)
     - Looping the game for a two-player party
     - Trying to spot all error-prone contingencies (problematic user input)
-### **December 7th:** Adding any final touch and create a Powerpoint for the final presentation
+### **December 7th:** 
+    - Adding any final touch and create a Powerpoint for the final presentation
 
 ### **Members**
 Naishvi and Mathieu
