@@ -34,3 +34,34 @@ language.
 
 ### **Members**
 Naishvi and Mathieu
+
+
+# Progress Updates (Oct 22 - Oct 30)
+
+## Week 1 (Oct 22 - Oct 27)
+
+### What did your team do last week?
+* Gathered information about the classic Scrabble game
+  * Number of each type of letters
+  * Number of points assigned to each letter
+  * Position of the bonus squares on the board
+* Created and started considering how to use a dictionary file, containing words in a list format
+* Established the functioning of points’ assignment to letters
+  * Any letter picked from the bag will be assigned a point once it is picked from the bag
+* Started implementing a bag object, using hashmaps to associate letters with numbers (number of points each letter is worth)
+
+
+### What will you do this week?
+* Focus on the creating the GUI
+  * Creating a board and letter tiles
+* Implementing user input and checking if the word exist in the dictonary 
+Naishvi
+* Responsible for checking if the user's word is in the dictionary 
+* Determining the point value of the users input
+Mathieu
+* Responsible for creating the tiles and board using the JAVAFX
+* Determining if user placement of tiles is valid and whether points or word need to be double/tripled
+
+### Any blocking issues/challenges need to be addressed?
+* Linking the tile letter with the word created in the letters classes 
+
