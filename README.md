@@ -36,7 +36,7 @@ language.
 Naishvi and Mathieu
 
 
-# Progress Updates (Oct 22 - Oct 30)
+# Progress Updates (Oct 22 - Nov 30)
 
 ## Week 1 (Oct 22 - Oct 27)
 
