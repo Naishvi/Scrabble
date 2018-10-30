@@ -55,10 +55,10 @@ Naishvi and Mathieu
 * Focus on the creating the GUI
   * Creating a board and letter tiles
 * Implementing user input and checking if the word exist in the dictonary 
-Naishvi
+### Naishvi
 * Responsible for checking if the user's word is in the dictionary 
 * Determining the point value of the users input
-Mathieu
+### Mathieu
 * Responsible for creating the tiles and board using the JAVAFX
 * Determining if user placement of tiles is valid and whether points or word need to be double/tripled
 
