@@ -16,7 +16,7 @@
 
 ### What will you do this week?
 - Together: 
-  - Continue building the Interface of the game
+  - Continuing to build the Interface of the game
 - Naishvi: 
   - Determining when the game will end
   - Finishing the triple/double letter value and word value
