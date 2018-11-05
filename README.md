@@ -3,10 +3,10 @@
 ## Week 2 (Nov 5 - Nov 12)
 
 ### What did your team do last week?
-Together: 
-- Worked on improving the layout for the code 
-- Determined if the word from the user input is valid 
-Test the method that we created to see their performance 
+- Together: 
+  - Worked on improving the layout for the code 
+  - Determined if the word from the user input is valid 
+  - Test the method that we created to see their performance 
 - Naishvi: 
   - Worked on getting the point value from a Hashmap
   - Starting to create methods that will triple/double letter value and word value
@@ -15,14 +15,14 @@ Test the method that we created to see their performance
   - Checked redundancy and code format
 
 ### What will you do this week?
-Together: 
-Continue building the Interface of the game
-Naishvi: 
-- Determining when the game will end
-- Finishing the triple/double letter value and word value
+- Together: 
+  - Continue building the Interface of the game
+- Naishvi: 
+  - Determining when the game will end
+  - Finishing the triple/double letter value and word value
 
-Mathieu: 
-- Designing the visual aspect of each card and making each have a separate image file
+- Mathieu: 
+  - Designing the visual aspect of each card and making each have a separate image file
 
 ### Any blocking issues/challenges need to be addressed?
 Linking the tiles interface to the letter in the Hashmap
