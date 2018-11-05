@@ -38,9 +38,6 @@ Naishvi and Mathieu
 
 # Progress Updates (Oct 22 - Nov 30)
 
-# Comments
-1. Create a separate ProgressUpdates.md, copy Progress Update section there and push it to master.
-
 ## Week 1 (Oct 22 - Oct 27)
 
 ### What did your team do last week?
@@ -94,3 +91,5 @@ Naishvi and Mathieu
 ### Any blocking issues/challenges need to be addressed?
 * Linking the tiles interface to the letter in the Hashmap
 
+# Comments
+1. Create a separate ProgressUpdates.md, copy Progress Update section there and push it to master.
