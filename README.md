@@ -91,3 +91,5 @@ Naishvi and Mathieu
 ### Any blocking issues/challenges need to be addressed?
 * Linking the tiles interface to the letter in the Hashmap
 
+# Comments
+1. Create a separate ProgressUpdates.md, copy Progress Update section there and push it to master.
