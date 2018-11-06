@@ -1,3 +1,4 @@
+package application;
 public enum Letter {
 	A('A', 1), B('B', 3), C('C', 3), D('D', 2), E('E', 1), F('F', 4), G('G', 2), H('H', 4), I('I', 1), J('J', 8), K('K',
 			5), L('L', 1), M('M', 3), N('N', 1), O('O', 1), P('P', 3), Q('Q', 10), R('R', 1), S('S',
