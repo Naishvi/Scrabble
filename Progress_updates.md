@@ -93,3 +93,37 @@ Naishvi and Mathieu
 
 # Comments
 1. Create a separate ProgressUpdates.md, copy Progress Update section there and push it to master.
+
+## Week 3 (Nov 13 - Nov 19)
+
+### What did your team do last week?
+- Together: 
+    - Created the layout of the board
+    - Finished the double word and letter and triple word and letter
+ 
+- Naishvi: 
+    - Determining when the double/triple word and letter will be true
+    - Determining how to calculate the points when the triple and double cases were true
+- Mathieu
+    - Starting to build the board and GUI for the game (frontend: GUI; backend: which squares on board trigger bonuses)
+    - Designing the aspect of each tile and square on the board
+
+### What will you do this week?
+- Together: 
+    - Continue building the Interface of the game
+    - Start on creating a connection between the client and server
+    - Testing the game
+- Naishvi: 
+    - Start build a connection with the client and server 
+    - Work on determining the how it will update the board as the game is played
+    - Help in the GUI with word placement
+- Mathieu: 
+    - Continue working on the board
+    - Adding placement rules for the board
+    - Checking user word and user word placement
+
+### Any blocking issues/challenges need to be addressed?
+- Trouble understanding how to calculate the double/triple word and letter values
+- Understanding how to connect with the server
+- Using SceneBuilder to create a user interface (more time-consuming than expected)
+
