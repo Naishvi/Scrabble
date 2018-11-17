@@ -1,16 +1,42 @@
 package application;
 
 public class Square {
-	int[] position;
-	String bonus;
+	private Position position;
+	private String bonus;
+	private Letter occupyingLetter;
 	
-	public Square(int[] givenPos, String bonus) {
-		
+	public Square(Position givenPos, String bonus) {
+		position = givenPos;
+		this.bonus = bonus;
+		occupyingLetter = null;
+	}
+	
+	public void clear() {
+		occupyingLetter = null;
 	}
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	public boolean isClear() {
+		return (occupyingLetter == null);
+	}
+	
+	public Position getPosition() {
+		return position;
+	}
+	
+	public String getBonus() {
+		return bonus;
+	}
+	
+	public Letter getLetter() {
+		return occupyingLetter;
+	}
 
+	public void setOccupyingLetter(char letter) {
+		occupyingLetter = new Letter(letter);
+	}
+	
+	static void main(String[] args) {
+		
 	}
 
 }
