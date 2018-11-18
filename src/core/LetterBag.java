@@ -1,11 +1,11 @@
-package application;
+package core;
 
 import java.util.Arrays;
 import java.util.HashMap;
 
 public class LetterBag {
 	HashMap<Character, Integer> letterValue;
-	private static final int capacity = 108;
+	private static final int CAPACITY = 108;
 	private int numberOfLetters;
 
 	private char[] letterArray = { 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D',

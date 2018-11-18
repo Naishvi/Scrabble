@@ -1,4 +1,4 @@
-package application;
+package core;
 
 public class Square {
 	private Position position;
@@ -33,6 +33,10 @@ public class Square {
 
 	public void setOccupyingLetter(char letter) {
 		occupyingLetter = new Letter(letter);
+	}
+	
+	public String toString() {
+		return position.toString() + occupyingLetter.get + bonus;
 	}
 	
 	static void main(String[] args) {
