@@ -1,10 +1,10 @@
 package core;
 
-public class Letter {
+public class LetterTile {
 	private char letter;
 	private int value;
 
-	private Letter(char letter, int value) {
+	private LetterTile(char letter, int value) {
 		this.letter = letter;
 		this.value = value;
 	}

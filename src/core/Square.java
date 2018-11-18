@@ -3,7 +3,7 @@ package core;
 public class Square {
 	private Position position;
 	private String bonus;
-	private Letter occupyingLetter;
+	private LetterTile occupyingLetter;
 	
 	public Square(Position givenPos, String bonus) {
 		position = givenPos;
@@ -27,12 +27,12 @@ public class Square {
 		return bonus;
 	}
 	
-	public Letter getLetter() {
+	public LetterTile getLetter() {
 		return occupyingLetter;
 	}
 
 	public void setOccupyingLetter(char letter) {
-		occupyingLetter = new Letter(letter);
+		occupyingLetter = new LetterTile(letter);
 	}
 	
 	public String toString() {
