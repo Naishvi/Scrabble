@@ -8,7 +8,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-	
+	public int numberOfTurns = 0; 
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -25,6 +25,16 @@ public class Main extends Application {
 	
 	public static void main(String[] args) {
 		launch(args);
+	}
+	public boolean fiveTurns() {
+		if(played == true) {
+			numberOfTurns++; 
+		}
+		return true; 
+		
+	}
+	public static void main(String [] args) {
+		
 	}
 
 }
