@@ -11,7 +11,7 @@
    <children>
       <VBox prefHeight="400.0" prefWidth="363.0">
          <children>
-            <GridPane alignment="CENTER" gridLinesVisible="true" prefHeight="327.0" prefWidth="310.0">
+            <GridPane alignment="CENTER" gridLinesVisible="true" prefHeight="456.0" prefWidth="506.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -155,12 +155,12 @@
                               <Insets />
                            </HBox.margin>
                         </TextField>
-                        <VBox prefHeight="68.0" prefWidth="139.0">
+                        <HBox prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="77.0" text="OK" />
-                              <Button mnemonicParsing="false" text="Cancel" />
+                              <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="78.0" text="OK" />
+                              <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="77.0" text="Cancel" />
                            </children>
-                        </VBox>
+                        </HBox>
                      </children></HBox>
                </children>
             </HBox>
@@ -185,7 +185,7 @@
                   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                </children>
             </GridPane>
-            <TextArea prefHeight="200.0" prefWidth="200.0" />
+            <TextArea editable="false" prefHeight="200.0" prefWidth="200.0" />
             <GridPane prefHeight="110.0" prefWidth="235.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

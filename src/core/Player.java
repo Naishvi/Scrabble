@@ -10,6 +10,7 @@ import java.util.Scanner;
 public class Player extends LetterBag {
 
 	private String currWord;
+	private LinkedList<LetterTile> hand;
 	// private Map
 
 	public static boolean isInDictionary(String playerWord, Scanner dictionary) {

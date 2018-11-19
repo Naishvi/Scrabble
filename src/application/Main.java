@@ -23,10 +23,6 @@ public class Main extends Application {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-//		for (int i = 0; i < 15 * 15; i++) {
-//			gridPane.getChildren().add(new ImageView("letters_and_squares/clear_square.png"));
-//		}
 	}
 	
 	public static void main(String[] args) {

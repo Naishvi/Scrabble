@@ -3,10 +3,14 @@ package core;
 public class LetterTile {
 	private char letter;
 	private int value;
+	private Position position;
+	private String image;
 
-	private LetterTile(char letter, int value) {
+	public LetterTile(char letter, int value, Position position, String image) {
 		this.letter = letter;
 		this.value = value;
+		this.position = position;
+		this.image = image;
 	}
 
 	public char getLetter() {
@@ -16,5 +20,13 @@ public class LetterTile {
 	public int getValue() {
 		return value;
 	}
-
+	
+	public Position getPosition() {
+		return position;
+	}
+	
+	public String getImage() {
+		return image;
+	}
+	
 }

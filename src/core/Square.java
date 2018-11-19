@@ -8,7 +8,6 @@ public class Square {
 	public Square(Position givenPos, String bonus) {
 		position = givenPos;
 		this.bonus = bonus;
-		occupyingLetter = null;
 	}
 	
 	public void clear() {
@@ -31,12 +30,20 @@ public class Square {
 		return occupyingLetter;
 	}
 
-	public void setOccupyingLetter(char letter) {
-		occupyingLetter = new LetterTile(letter);
+	public void setOccupyingLetter(LetterTile letter) {
+		occupyingLetter = letter;
+	}
+	
+	public LetterTile removeLetter() {
+		LetterTile oldLetter = occupyingLetter;
+		occupyingLetter = null;
+		return oldLetter;
 	}
 	
 	public String toString() {
-		return position.toString() + occupyingLetter.get + bonus;
+		return position.toString() + 
+				", " + occupyingLetter + 
+				(bonus == "" ? "" : ", Bonus:" + bonus);
 	}
 	
 	static void main(String[] args) {
