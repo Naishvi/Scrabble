@@ -157,8 +157,8 @@
                         </TextField>
                         <HBox prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="78.0" text="OK" />
-                              <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="77.0" text="Cancel" />
+                              <Button fx:id="btnOK" mnemonicParsing="false" onAction="#confirmAction" prefHeight="39.0" prefWidth="78.0" text="OK" />
+                              <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#cancelAction" prefHeight="39.0" prefWidth="77.0" text="Cancel" />
                            </children>
                         </HBox>
                      </children></HBox>
