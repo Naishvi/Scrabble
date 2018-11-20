@@ -5,5 +5,6 @@ public class Board {
 	
 	public Board(int dimensions) {
 		board = new Square[dimensions][dimensions];
+		
 	}
 }

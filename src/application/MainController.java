@@ -1,15 +1,26 @@
 package application;
 
 
+import java.awt.TextField;
+
+import javax.swing.JButton;
+import javax.swing.JTextField;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 
 public class MainController {
-
+	Dictionary dictionary = new Dictionary();
+	Player player = new Player(); 
+	@FXML 
+	public TextField UserInput = new TextField();
+	
     @FXML
     private Label word1;
 
@@ -61,5 +72,43 @@ public class MainController {
     void makeBlur4(MouseEvent event) {
     	word4.setEffect(new GaussianBlur(20.0));
     }
-
+    @FXML
+    public void Quit(ActionEvent event) {
+    	
+			 System.out.println("Thank you for playing!"); 
+	        	System.exit(0);  
+	           
+    }
+    
+    //JButton okButton = new JButton();
+    //okButton.setActionCommand("OK");
+    
+    @FXML
+    public void OK(ActionEvent event){
+    	
+    	String word = UserInput.getText();
+    	System.out.println(word); 
+    	if(dictionary.containsWord(word)) {
+    	   int value = player.getValOfWord(UserInput.getText(), new LetterBag());
+    	   System.out.println(value);
+    	}
+    	else {
+    		System.out.println("Try another word");
+    	}
+    }
+   	
+    	
+    
+    
+    @FXML
+    public void Cancel(ActionEvent event) {
+    	UserInput.setText("");
+    }
+    
+    @FXML
+    public void WordEntered(KeyEvent onKeyTyped){
+    	
+    	
+   
+    }   
 }

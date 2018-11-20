@@ -13,7 +13,6 @@ public class Server {
 		ServerSocket server = new ServerSocket(3000); 
 		Socket s = server.accept(); 
 		
-		
 		System.out.println("Connected");
 		
 		}
