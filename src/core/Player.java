@@ -1,4 +1,4 @@
-package application;
+package core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,10 +8,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-public class Player{
-	 
-	public String currWord;
-	boolean userClickedOk = false; 
+public class Player extends LetterBag {
+
+	private String currWord;
+	private LinkedList<LetterTile> hand;
 	// private Map
 	//public Player() {
 		 

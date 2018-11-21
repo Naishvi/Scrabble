@@ -16,6 +16,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 
 public class MainController {
+<<<<<<< HEAD
 	Dictionary dictionary = new Dictionary();
 	Player player = new Player(); 
 	@FXML 
@@ -111,4 +112,14 @@ public class MainController {
     	
    
     }   
+=======
+
+    private Button btnOK = new Button();
+    private Button btnCancel = new Button();
+    private Button playTurn = new Button();
+    private Button skipTurn = new Button();
+    
+    
+
+>>>>>>> 51489d6b6b5c146d2f431097b0a133ead914ef08
 }

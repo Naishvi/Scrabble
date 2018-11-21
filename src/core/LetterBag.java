@@ -1,4 +1,4 @@
-package application;
+package core;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,7 +9,7 @@ import javafx.scene.image.Image;
 public class LetterBag {
 	HashMap<Character, Integer> letterValue;
 	HashMap<Character, Image> letterImage; 
-	private static final int capacity = 108;
+	private static final int CAPACITY = 108;
 	private int numberOfLetters;
 
 	private static char[] letterArray = { 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D',
