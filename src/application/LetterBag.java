@@ -82,7 +82,7 @@ public class LetterBag {
 		letterImage.put('W', new Image("letter_W.png"));
 		letterImage.put('X', new Image("letter_X.png"));
 		letterImage.put('Y', new Image("letter_Y.png"));
-		letterImage.put('z', new Image("letter_Z.png"));
+		letterImage.put('Z', new Image("letter_Z.png"));
 	}
 
 
