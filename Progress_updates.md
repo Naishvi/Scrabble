@@ -127,3 +127,40 @@ Naishvi and Mathieu
 - Understanding how to connect with the server
 - Using SceneBuilder to create a user interface (more time-consuming than expected)
 
+
+## Week 4 (Nov 19 - Nov 26)
+
+### What did your team do last week?
+- Together: 
+    - Created the layout of the board
+    - Added user input to the board
+    - Created a score board
+    - Started client-server code
+
+- Naishvi: 
+    - Started creating a Client-Server Connection
+    - Worked on when the game will end
+- Mathieu:
+    - Created the grid for the game
+    - Added user input bar
+    - Score Board
+
+### What will you do this week?
+- Together: 
+    - Continue building the Interface of the game
+    - Finish creating a connection between the client and server
+    - Testing the game
+- Naishvi: 
+    - Finish  building a connection with the client and server 
+    - Work on determining the how it will update the board as the game is played
+    - Linking an image to a letter in Hashmap
+
+- Mathieu: 
+    - Continue working on the board
+    - Adding placement rules for the board
+    - Checking user word and user word placement
+
+### Any blocking issues/challenges need to be addressed?
+- Double/Triple word and letter was deleted due to time limitations
+- Understanding how to connect with the server
+- Using SceneBuilder to create a user interface is more challenging and time-consuming than expected
