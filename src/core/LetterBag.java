@@ -1,38 +1,43 @@
 package core;
 
 import java.util.List;
+import java.util.Random;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-
-import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class LetterBag {
 	HashMap<Character, Integer> letterValue;
-	HashMap<Character, Image> letterImage; 
+	public static HashMap<Character, String> letterImage; 
 	private static final int CAPACITY = 108;
-	public static char[] shuffledArray;
+	
 	List<Character> s = new ArrayList<>();
-	private int numberOfLetters;
+	
 
 	public static char[] letterArray = { 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D',
 			'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'G', 'G', 'G', 'H', 'H', 'I', 'I',
 			'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'K', 'L', 'L', 'L', 'L', 'M', 'M', 'N', 'N', 'N', 'N', 'N', 'N',
 			'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S', 'S', 'S',
 			'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z', ' ', ' ' };
-
-	public static void shuffle() {
-		List<Character> sl = Arrays.asList(letterArray);
-		Collections.shuffle(sl);
-		char[] shuffledLetters = (char)
-		//Collections.shuffle(Arrays.asList(letterArray));
-		
-		
+	
+	public static char[] shuffledArray = shuffle(letterArray); 
+	
+	public static char[] shuffle(char [] letterArray) {
+		Random r = new Random();  // Random number generator			
+		 
+		for (int i=0; i<letterArray.length; i++) {
+		    int randomPosition = r.nextInt(letterArray.length);
+		    char temp = letterArray[i];
+		    letterArray[i] = letterArray[randomPosition];
+		    letterArray[randomPosition] = temp;
+		}
+		return letterArray;
 	}
-	public static void main(String[] args) {
-		shuffle();
+	
 
+	
+	public static void main(String[] args) {
+		shuffle(letterArray);					
 	}
 
 
@@ -66,35 +71,34 @@ public class LetterBag {
 		letterValue.put('Y', 4);
 		letterValue.put('Z', 10);
 		letterValue.put(' ', 0);
-	}
-	public void Image() {
+
 		letterImage = new HashMap<>();
-		letterImage.put('A', new Image("letter_A.png"));
-		letterImage.put('B', new Image("letter_B.png"));
-		letterImage.put('C', new Image("letter_C.png"));
-		letterImage.put('D', new Image("letter_D.png"));
-		letterImage.put('E', new Image("letter_E.png"));
-		letterImage.put('F', new Image("letter_F.png"));
-		letterImage.put('G', new Image("letter_G.png"));
-		letterImage.put('H', new Image("letter_H.png"));
-		letterImage.put('I', new Image("letter_I.png"));
-		letterImage.put('J', new Image("letter_J.png"));
-		letterImage.put('K', new Image("letter_K.png"));
-		letterImage.put('L', new Image("letter_L.png"));
-		letterImage.put('M', new Image("letter_M.png"));
-		letterImage.put('N', new Image("letter_N.png"));
-		letterImage.put('O', new Image("letter_O.png"));
-		letterImage.put('P', new Image("letter_P.png"));
-		letterImage.put('Q', new Image("letter_Q.png"));
-		letterImage.put('R', new Image("letter_R.png"));
-		letterImage.put('S', new Image("letter_S.png"));
-		letterImage.put('T', new Image("letter_T.png"));
-		letterImage.put('U', new Image("letter_U.png"));
-		letterImage.put('V', new Image("letter_V.png"));
-		letterImage.put('W', new Image("letter_W.png"));
-		letterImage.put('X', new Image("letter_X.png"));
-		letterImage.put('Y', new Image("letter_Y.png"));
-		letterImage.put('Z', new Image("letter_Z.png"));
+		letterImage.put('A', "letter_A.png");
+		letterImage.put('B', "letter_B.png");
+		letterImage.put('C', "letter_C.png");
+		letterImage.put('D', "letter_D.png");
+		letterImage.put('E', "letter_E.png");
+		letterImage.put('F', "letter_F.png");
+		letterImage.put('G', "letter_G.png");
+		letterImage.put('H', "letter_H.png");
+		letterImage.put('I', "letter_I.png");
+		letterImage.put('J', "letter_J.png");
+		letterImage.put('K', "letter_K.png");
+		letterImage.put('L', "letter_L.png");
+		letterImage.put('M', "letter_M.png");
+		letterImage.put('N', "letter_N.png");
+		letterImage.put('O', "letter_O.png");
+		letterImage.put('P', "letter_P.png");
+		letterImage.put('Q', "letter_Q.png");
+		letterImage.put('R', "letter_R.png");
+		letterImage.put('S', "letter_S.png");
+		letterImage.put('T', "letter_T.png");
+		letterImage.put('U', "letter_U.png");
+		letterImage.put('V', "letter_V.png");
+		letterImage.put('W', "letter_W.png");
+		letterImage.put('X', "letter_X.png");
+		letterImage.put('Y', "letter_Y.png");
+		letterImage.put('Z', "letter_Z.png");
 	}
 
 
@@ -102,12 +106,9 @@ public class LetterBag {
 		return letterValue.get(letter);
 	}
 
-	public Image getBag(Character letter) {
+	public static String getBag(Character letter) {
 		return letterImage.get(letter);
 
-	}
-	public javafx.scene.image.Image LetterToImage(char playerLetters) {
-		return letterImage.get(playerLetters); 
 	}
 
 
