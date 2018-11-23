@@ -1,4 +1,4 @@
-package core;
+package application;
 
 public class LetterTile {
 	private char letter;

@@ -1,4 +1,4 @@
-package core;
+package application;
 
 public class LinkedList<T> implements ListInterface<T> {
 	private Node firstNode;

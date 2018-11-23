@@ -1,5 +1,8 @@
 package core;
 
+import application.LetterTile;
+import application.Position;
+
 public class Square {
 	private Position position;
 	private String bonus;

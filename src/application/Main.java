@@ -12,26 +12,72 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.effect.Glow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public class Main extends Application {
 	
-	public static final Font UNIVERSAL_FONT = Font.font("Berlin Sans FB", 14);
-	public static final Font UNIVERSAL_FONT_BOLD = Font.font("Berlin Sans FB", FontWeight.BOLD, 14);
-	public static final Insets LETTER_INSETS = new Insets(2, 2, 2, 2);
-	public static final Insets OPTION_BUTTON_INSETS = new Insets(5, 5, 5, 5);
+	
+	private static final Font UNIVERSAL_FONT = Font.font("Berlin Sans FB", 16);
+	private static final Font UNIVERSAL_FONT_BOLD = Font.font("Berlin Sans FB", FontWeight.BOLD, 14);
+	private static final Insets LETTER_INSETS = new Insets(2, 2, 2, 2);
+	private static final Insets OPTION_BUTTON_INSETS = new Insets(5, 5, 5, 5);
+	private static final String BACKGROUND_COLOR = "-fx-background-color: #ffffff";
+	private static final String FIRST_PROMPT = "Choose your action.";
+	private static final String PLAY_PROMPT = ".Type your word";
+	
+	// GAME STATES
+	
+	private boolean isTurnChoiceStep;
+	private boolean isWordTypingStep;
+	private boolean isLetterPlacingStep;
+	// sub-step of isLetterPlacingStep. Might remain unused. Would make board only allow letter
+	// placement along the row or column common the first 2 letters placed.
+	private boolean rowOrColIsDetermined; 
+	
+	
+
+	// GAME COMPONENTS
+	
+	Board board;
+	Player you;
+	Player opp;
+	
+	
+	//// UTILITIES ////
+	
+	public void insertImage(GridPane grid, int row, int col, String img) {
+		ImageView newImg = new ImageView(img);
+		//if (!newImg.getId().contains("letter_")) {
+			newImg.setOnMouseEntered(e -> newImg.setEffect(new Glow(0.7)));
+			newImg.setOnMouseExited(e -> newImg.setEffect(new Glow(0)));
+		//}
+		newImg.setFitWidth(30);
+		newImg.setFitHeight(30);
+		grid.setGridLinesVisible(false);
+		grid.add(newImg, col, row);
+		grid.setGridLinesVisible(true);
+	}
+	
+	
+	
+	//// START ////
+	
 	
 	@Override
 	public void start(Stage primaryStage) {
 		
-		primaryStage.setTitle("Scrabble Game");
+		board = new Board();
+		you = new Player();
+		opp = new Player();
 		
 		Group root = new Group();
 		
@@ -61,6 +107,8 @@ public class Main extends Application {
 			rightVBox.getChildren().addAll(scorePanel, instructionDisplay, optionBtns, quitBtn); // adding
 		windowHBox.getChildren().addAll(leftVBox, rightVBox); // adding
 
+		
+		
 		// BOARD
 		VBox.setMargin(boardGrid, new Insets(10, 10, 10, 10));
 		boardGrid.setMaxSize(400, 400);
@@ -68,13 +116,16 @@ public class Main extends Application {
 		boardGrid.setPrefHeight(400);
 		for (int i = 0; i < 15; i++) {
 			for (int j = 0; j < 15; j++) {
-				ImageView img = new ImageView("clear_square.png");
-				img.setFitWidth(30);
-				img.setFitHeight(30);
-				boardGrid.add(img, j, i);
+				board.getSquares()[i][j] = new Cell();
+				boardGrid.add(board.getSquares()[i][j], j, i);
+				insertImage(boardGrid, i, j, "clear_square.png");
 			}
 		}
 		boardGrid.setGridLinesVisible(true);
+		
+		insertImage(boardGrid, 7, 7, "middle_square.png");
+		
+		
 		
 		//// LEFT VBOX ////
 		
@@ -110,17 +161,17 @@ public class Main extends Application {
 		}
 		
 		
-		ImageView letterA = new ImageView("letter_A.png");
-		letterA.setFitHeight(60);
-		letterA.setFitWidth(60);								// for testing purposes
-		ImageView letterG = new ImageView("letter_G.png");
-		letterG.setFitHeight(60);
-		letterG.setFitWidth(60);
-		
-		playerHand.add(letterA, 0,0);
-		GridPane.setMargin(letterA, LETTER_INSETS);
-		playerHand.add(letterG, 1,0);
-		GridPane.setMargin(letterG, LETTER_INSETS);
+//		ImageView letterA = new ImageView("letter_A.png");
+//		letterA.setFitHeight(60);
+//		letterA.setFitWidth(60);								// for testing purposes
+//		ImageView letterG = new ImageView("letter_G.png");
+//		letterG.setFitHeight(60);
+//		letterG.setFitWidth(60);
+//		
+//		playerHand.add(letterA, 0,0);
+//		GridPane.setMargin(letterA, LETTER_INSETS);
+//		playerHand.add(letterG, 1,0);
+//		GridPane.setMargin(letterG, LETTER_INSETS);
 		
 		
 		//// RIGHT VBOX ////
@@ -132,6 +183,9 @@ public class Main extends Application {
 		// INSTR DISP
 		instructionDisplay.setEditable(false);
 		VBox.setMargin(instructionDisplay, new Insets(10, 10, 10, 10));
+		instructionDisplay.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+		instructionDisplay.setFont(Font.font("Courier New", 16));
+		instructionDisplay.setText(FIRST_PROMPT);
 		
 		// OPTION BUTTONS
 		optionBtns.setAlignment(Pos.CENTER);
@@ -139,6 +193,13 @@ public class Main extends Application {
 		GridPane.setMargin(playTurnBtn, OPTION_BUTTON_INSETS);
 		playTurnBtn.setPrefSize(120, 90);
 		playTurnBtn.setFont(UNIVERSAL_FONT);
+		playTurnBtn.setOnMouseClicked(e -> {
+			instructionDisplay.setText(PLAY_PROMPT);
+			isTurnChoiceStep = false;
+			isWordTypingStep = true;
+			playTurnBtn.setDisable(true);
+		}
+				);
 		
 		exchange1Btn.setPrefSize(120, 90);
 		GridPane.setMargin(exchange1Btn, OPTION_BUTTON_INSETS);
@@ -154,20 +215,29 @@ public class Main extends Application {
 
 		quitBtn.setPrefSize(50, 45);
 		VBox.setMargin(quitBtn, new Insets(5, 5, 5, 280));
-		quitBtn.setFont(UNIVERSAL_FONT);
-		
-		//quitBtn.setAlignment(Pos.CENTER_RIGHT);
+		quitBtn.setFont(Font.font("Berlin Sans FB", 14));
+	
 		
 		
 		
 		//// ACTIONS ////
 		
+		okBtn.setDisable(isWordTypingStep ? false : true);
 		quitBtn.setOnAction(e -> System.exit(0));
 		
+
 		
+		isTurnChoiceStep = true;
+		isWordTypingStep = false;
+		isLetterPlacingStep = false;
+		rowOrColIsDetermined = false;
+		
+		windowHBox.setStyle(BACKGROUND_COLOR);
 		Scene myScene = new Scene(windowHBox, 800, 600);
+		
 		primaryStage.setScene(myScene);
 		primaryStage.setResizable(false);
+		primaryStage.setTitle("Scrabble Game");
 		primaryStage.show();
 		
 		

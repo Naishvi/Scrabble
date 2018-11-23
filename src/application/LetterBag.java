@@ -1,4 +1,4 @@
-package core;
+package application;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class LetterBag {
 		letterValue.put(' ', 0);
 	}
 
-	public int getValue(Character letter) {
-		return letterValue.get(letter);
+	public int getValue(LetterTile letter) {
+		return letterValue.get(letter.getLetter());
 	}
 }
