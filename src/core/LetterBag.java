@@ -1,5 +1,7 @@
 package core;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,18 +12,28 @@ public class LetterBag {
 	HashMap<Character, Integer> letterValue;
 	HashMap<Character, Image> letterImage; 
 	private static final int CAPACITY = 108;
+	public static char[] shuffledArray;
+	List<Character> s = new ArrayList<>();
 	private int numberOfLetters;
 
-	private static char[] letterArray = { 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D',
+	public static char[] letterArray = { 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D',
 			'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'F', 'F', 'G', 'G', 'G', 'H', 'H', 'I', 'I',
 			'I', 'I', 'I', 'I', 'I', 'I', 'I', 'J', 'K', 'L', 'L', 'L', 'L', 'M', 'M', 'N', 'N', 'N', 'N', 'N', 'N',
 			'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'P', 'P', 'Q', 'R', 'R', 'R', 'R', 'R', 'R', 'S', 'S', 'S', 'S',
 			'T', 'T', 'T', 'T', 'T', 'T', 'U', 'U', 'U', 'U', 'V', 'V', 'W', 'W', 'X', 'Y', 'Y', 'Z', ' ', ' ' };
+
 	public static void shuffle() {
-		Collections.shuffle(Arrays.asList(letterArray));
+		List<Character> sl = Arrays.asList(letterArray);
+		Collections.shuffle(sl);
+		char[] shuffledLetters = (char)
+		//Collections.shuffle(Arrays.asList(letterArray));
+		
+		
 	}
+	public static void main(String[] args) {
+		shuffle();
 
-
+	}
 
 
 	public LetterBag() {
@@ -86,17 +98,17 @@ public class LetterBag {
 	}
 
 
-public int getValue(Character letter) {
-	return letterValue.get(letter);
-}
+	public int getValue(Character letter) {
+		return letterValue.get(letter);
+	}
 
-public Image getBag(Character letter) {
-	return letterImage.get(letter);
-	
-}
-public javafx.scene.image.Image LetterToImage(Image i) {
-	return letterImage.get(i); 
-}
+	public Image getBag(Character letter) {
+		return letterImage.get(letter);
+
+	}
+	public javafx.scene.image.Image LetterToImage(char playerLetters) {
+		return letterImage.get(playerLetters); 
+	}
 
 
 

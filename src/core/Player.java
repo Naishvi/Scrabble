@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Player extends LetterBag {
-
+	static LetterBag letterValue = new LetterBag(); 
 	private String currWord;
 	private LinkedList<LetterTile> hand;
 	// private Map
@@ -18,7 +18,7 @@ public class Player extends LetterBag {
 	//}
 
 
-	public int getValOfWord(String word, LetterBag letterValue) {
+	public static int getValOfWord(String word) {
 
 		int wordPoints = 0;
 		char[] letterArray = word.toCharArray();
