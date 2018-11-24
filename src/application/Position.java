@@ -2,8 +2,8 @@ package application;
 
 public class Position {
 	
-	int row;
-	int col;
+	private int row;
+	private int col;
 	
 	public Position(int r, int c) {
 		row = r;

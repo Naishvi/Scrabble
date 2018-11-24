@@ -2,25 +2,31 @@ package application;
 
 import java.io.File;
 
+import javafx.scene.image.Image;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 
-public class Cell extends Pane {
+public class Cell extends GridPane {
 
 	private boolean hasBonus;
 	private int bonusMult;
 	private char bonusType;
-	private File image;
+	private String image;
+	private String hiddenImage;
 	private String fullBonus;
-	private LetterTile occupyingLetter;
+	private Character occupyingLetter;
 	private Position position;
 
 	public Cell() {
 		hasBonus = false;
-		image = new File("letters_and_squares/clear_square.png");
+		image = "clear_square.png";
 		occupyingLetter = null;
 	}
 
-	public Cell(int bonusMult, char bonusType) {
+	public Cell(String fb) {
+		int bonusMult = Integer.parseInt(fb.substring(0, 1));
+		char bonusType = fb.charAt(1);
+		
 		if (bonusMult != 2 && bonusMult != 3) {
 			System.out.println("Multiplicator: 2 and 3 only");
 			return;
@@ -36,14 +42,14 @@ public class Cell extends Pane {
 
 		if (bonusMult == 2) {
 			if (bonusType == 'L')
-				image = new File("letters_and_squares/square_2L.png");
+				image = "square_2L.png";
 			if (bonusType == 'W')
-				image = new File("letters_and_squares/square_2W.png");
+				image = "square_2W.png";
 		} else {
 			if (bonusType == 'L')
-				image = new File("letters_and_squares/square_3L.png");
+				image = "square_3L.png";
 			if (bonusType == 'W')
-				image = new File("letters_and_squares/square_3L.png");
+				image = "square_3W.png";;
 		}
 	}
 
@@ -70,21 +76,52 @@ public class Cell extends Pane {
 	public String getBonus() {
 		return ("" + bonusMult + bonusType);
 	}
+	
+	public void setBonus(String bonus) {
+		bonusMult = Integer.parseInt(bonus.substring(0, 1));
+		bonusType = bonus.charAt(1);
+	}
 
-	public LetterTile getLetter() {
+	public Character getLetter() {
 		return occupyingLetter;
 	}
 
-	public void setOccupyingLetter(LetterTile letter) {
-		occupyingLetter = letter;
+	public void setOccupyingLetter(Character ltr) {
+		occupyingLetter = ltr;
+		setImage("letter_" + ltr + ".png");
 	}
 
-	public LetterTile removeLetter() {
-		LetterTile oldLetter = occupyingLetter;
+	public Character removeLetter() {
+		Character oldLetter = occupyingLetter;
 		occupyingLetter = null;
 		return oldLetter;
 	}
+	
+	
+	public String getImage() {
+		return image;
+	}
+	
+	public void setImage(String newImg) {
+		image = newImg;
+	}
+	
+	public String getHiddenImage() {
+		return hiddenImage;
+	}
 
+	public void setHiddenImage(String newHiddenImage) {
+		hiddenImage = newHiddenImage;
+	}
+	
+	public String getFullBonus() {
+		return fullBonus;
+	}
+	
+	public void setFullBonus(String fb) {
+		fullBonus = fb;
+	}
+	
 	public String toString() {
 		return position.toString() + ", " + occupyingLetter + (hasBonus() ? ", Bonus:" + getBonus() : "");
 	}

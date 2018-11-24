@@ -12,7 +12,7 @@ public class Board {
 		squares = new Cell[ROW_DIMENSION][COL_DIMENSION];
 	}
 	
-	public void occupyWith(Position pos, LetterTile ltr) {
+	public void occupyWith(Position pos, Character ltr) {
 		int r = pos.getRow();
 		int c = pos.getCol();
 		if ((r < 0 || r >= ROW_DIMENSION) || (c < 0 || c >= COL_DIMENSION)) {
@@ -20,7 +20,7 @@ public class Board {
 		}
 		
 		if (squares[r][c].isClear()) {
-			squares[r][c].setOccupyingLetter(ltr.getLetter());
+			squares[r][c].setOccupyingLetter(ltr);
 			
 		}
 		else
@@ -32,7 +32,7 @@ public class Board {
 		int c = pos.getCol();
 		if (!squares[r][c].isClear()) {
 			squares[r][c] = null;
-			refreshGUIBoardState();
+			//refreshGUIBoardState();
 			return true;
 		}
 		return false;
@@ -49,7 +49,22 @@ public class Board {
 				squares[i][j].removeLetter();
 			}
 		}
-		refreshGUIBoardState();
+		//refreshGUIBoardState();
+	}
+	
+	public Position[] getPlacementRestrictions() {
+		Position[] occupiedPositions = new Position[ROW_DIMENSION * COL_DIMENSION];    
+		int counter1D = 0;
+		
+		for (int i = 0; i < ROW_DIMENSION; i++) {
+			for (int j = 0; j < COL_DIMENSION; j++) {
+				if (!squares[i][j].isClear()) {
+					occupiedPositions[counter1D] = new Position(i, j);
+					counter1D++;
+				}
+			}
+		}
+		return occupiedPositions;
 	}
 	
 	

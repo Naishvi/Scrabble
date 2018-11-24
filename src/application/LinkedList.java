@@ -1,5 +1,7 @@
 package application;
 
+import LinkedBag.Node;
+
 public class LinkedList<T> implements ListInterface<T> {
 	private Node firstNode;
 	private boolean initialized = false;
@@ -46,6 +48,11 @@ public class LinkedList<T> implements ListInterface<T> {
 		before.setNext(newNode); // When loop finished, after == null;
 									// newPosition == length; end of chain
 	}
+	
+	public void addMultiple(T anEntry, int numberOfTimes) {
+		for (int i = 0; i < numberOfTimes; i++)
+			  add(anEntry);
+     }
 
 	public T remove(int givenPosition) {
 		if (isEmpty())
@@ -135,6 +142,20 @@ public class LinkedList<T> implements ListInterface<T> {
 
 		throw new IndexOutOfBoundsException("Please enter a valid position");
 	}
+	
+	public void shuffle() {
+		LinkedList<T> newList = new LinkedList<>();
+		int originalLength = getLength();
+		for (int i = 0; i < originalLength; i++) {
+			newList.add(remove(0));
+
+		}
+		for (int k = 0; k < originalLength; k++) {
+			int randomIndex = (int) (Math.random() * newList.getLength());
+			add(newList.remove(randomIndex));
+		}
+
+	}
 
 	public boolean contains(T anEntry) {
 		Node currNode;
@@ -145,9 +166,19 @@ public class LinkedList<T> implements ListInterface<T> {
 		}
 		return false;
 	}
+	
+	 public int getFrequencyOf(T newEntry) {
+
+         int counter = 0;
+         for (Node currentNode = firstNode; currentNode != null; currentNode = currentNode.getNext()) {
+               if (currentNode.getData().equals(newEntry)) {
+                      counter++;
+               }
+         }
+         return counter;
+  }
 
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
 		return (firstNode == null);
 	}
 

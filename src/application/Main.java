@@ -9,10 +9,12 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.effect.Glow;
+import javafx.scene.effect.Lighting;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -24,110 +26,151 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-	
-	
+
 	private static final Font UNIVERSAL_FONT = Font.font("Berlin Sans FB", 16);
 	private static final Font UNIVERSAL_FONT_BOLD = Font.font("Berlin Sans FB", FontWeight.BOLD, 14);
 	private static final Insets LETTER_INSETS = new Insets(2, 2, 2, 2);
 	private static final Insets OPTION_BUTTON_INSETS = new Insets(5, 5, 5, 5);
 	private static final String BACKGROUND_COLOR = "-fx-background-color: #ffffff";
-	private static final String FIRST_PROMPT = "Choose your action.";
-	private static final String PLAY_PROMPT = ".Type your word";
-	
+	private static final String FIRST_PROMPT = "Choose your action";
+	private static final String PLAY_PROMPT = "Type your word. If you want to use letters "
+			+ "already on the board as part of your word, just have them included in the word "
+			+ "you are going to type ";
+	private static final String PLACE_LETTERS_PROMPT = "Place your letters on the board \n"
+			+ "Conditions: at least one letter already on board is used (or star square for "
+			+ "the first turn); all letters are adjacent; word is written out from top to bottom ";
+	private static final String CONFIRM_PROMPT = "Confirm or cancel";
+	private static final int MINIMUM_WORD_LENGTH = 2;
+	private static final int ROW_AND_COL_DIMENSION = 15;
+
 	// GAME STATES
-	
-	private boolean isTurnChoiceStep;
-	private boolean isWordTypingStep;
-	private boolean isLetterPlacingStep;
-	// sub-step of isLetterPlacingStep. Might remain unused. Would make board only allow letter
-	// placement along the row or column common the first 2 letters placed.
-	private boolean rowOrColIsDetermined; 
-	
-	
+
+	// private boolean isTurnChoiceStep;
+	// private boolean isWordTypingStep;
+	// private boolean isLetterPlacingStep;
+	// // sub-step of isLetterPlacingStep. Might remain unused. Would make board
+	// only
+	// // allow letter
+	// // placement along the row or column common the first 2 letters placed.
+	// private boolean rowOrColIsDetermined;
 
 	// GAME COMPONENTS
-	
+
 	Board board;
+	GridPane boardGrid;
+	Board savedBoardState;
+	GridPane savedGridAspect;
+	LetterBag letterBag;
+	Dictionary dictionary;
+	LinkedList<Position> enforcedPositions;
+	TextField userInput;
+	Button okBtn;
+	Button cancelBtn;
+	TextArea instructionDisplay;
+	Button playTurnBtn;
+	Button exchange1Btn;
+	Button exchangeAllBtn;
+	Button skipTurnBtn;
+	ArrayDictionary<Character, Integer> placedLettersTracker;
+	
 	Player you;
-	Player opp;
-	
-	
-	//// UTILITIES ////
-	
-	public void insertImage(GridPane grid, int row, int col, String img) {
-		ImageView newImg = new ImageView(img);
-		//if (!newImg.getId().contains("letter_")) {
-			newImg.setOnMouseEntered(e -> newImg.setEffect(new Glow(0.7)));
-			newImg.setOnMouseExited(e -> newImg.setEffect(new Glow(0)));
-		//}
-		newImg.setFitWidth(30);
-		newImg.setFitHeight(30);
-		grid.setGridLinesVisible(false);
-		grid.add(newImg, col, row);
-		grid.setGridLinesVisible(true);
-	}
-	
-	
-	
+	Cell[] yourHand;
+	GridPane playerHand;
+	Player opponent;
+
+	double step;
+	boolean firstTurn;
+	int userWordIndex;
+	int letterRow;
+	int letterCol;
+	int lengthCounter;
+
 	//// START ////
-	
-	
+
 	@Override
 	public void start(Stage primaryStage) {
-		
+
 		board = new Board();
-		you = new Player();
-		opp = new Player();
-		
+		savedBoardState = new Board();
+		savedGridAspect = new GridPane();
+		letterBag = new LetterBag();
+		dictionary = new Dictionary("Dictionary.txt");
+		enforcedPositions = new LinkedList<>();
+		placedLettersTracker = new ArrayDictionary<>();
+
+		you = new Player(letterBag);
+		yourHand = new Cell[you.getFinalHandSize()];
+		opponent = new Player(letterBag);
+
+		step = 1;
+		firstTurn = true;
+		userWordIndex = 0;
+		lengthCounter = 0;
+
 		Group root = new Group();
-		
+
 		HBox windowHBox = new HBox();
 			VBox leftVBox = new VBox();
-				GridPane boardGrid = new GridPane();
+				boardGrid = new GridPane();
 				HBox tfOkCancel = new HBox();
-					TextField userInput = new TextField();
-					Button okBtn = new Button("OK");
-					Button cancelBtn = new Button("Cancel");
-					tfOkCancel.getChildren().addAll(userInput, okBtn, cancelBtn); // adding
-				GridPane playerHand = new GridPane();
+					userInput = new TextField();
+					okBtn = new Button("OK");
+					cancelBtn = new Button("Cancel");
+				tfOkCancel.getChildren().addAll(userInput, okBtn, cancelBtn); // adding
+				playerHand = new GridPane();
 			leftVBox.getChildren().addAll(boardGrid, tfOkCancel, playerHand); // adding
 			VBox rightVBox = new VBox();
 				GridPane scorePanel = new GridPane();
-				TextArea instructionDisplay = new TextArea();
+				instructionDisplay = new TextArea();
 				GridPane optionBtns = new GridPane();
-					Button playTurnBtn = new Button("Play");
-					Button exchange1Btn = new Button("Exchange 1");
-					Button exchangeAllBtn = new Button("Exchange all");
-					Button skipTurnBtn = new Button("Skip");
-					Button quitBtn = new Button("Quit");
-				optionBtns.add(playTurnBtn, 0,0);
-				optionBtns.add(exchange1Btn, 1,0);
-				optionBtns.add(exchangeAllBtn, 0,1);
-				optionBtns.add(skipTurnBtn, 1,1);
+					playTurnBtn = new Button("Play");
+					exchange1Btn = new Button("Exchange 1");
+					exchangeAllBtn = new Button("Exchange all");
+					skipTurnBtn = new Button("Skip");
+				Button quitBtn = new Button("Quit");
+				optionBtns.add(playTurnBtn, 0, 0);
+				optionBtns.add(exchange1Btn, 1, 0);
+				optionBtns.add(exchangeAllBtn, 0, 1);
+				optionBtns.add(skipTurnBtn, 1, 1);
 			rightVBox.getChildren().addAll(scorePanel, instructionDisplay, optionBtns, quitBtn); // adding
 		windowHBox.getChildren().addAll(leftVBox, rightVBox); // adding
 
-		
-		
+		//// LEFT VBOX ////
+
 		// BOARD
 		VBox.setMargin(boardGrid, new Insets(10, 10, 10, 10));
 		boardGrid.setMaxSize(400, 400);
 		boardGrid.setPrefWidth(400);
 		boardGrid.setPrefHeight(400);
-		for (int i = 0; i < 15; i++) {
-			for (int j = 0; j < 15; j++) {
-				board.getSquares()[i][j] = new Cell();
-				boardGrid.add(board.getSquares()[i][j], j, i);
-				insertImage(boardGrid, i, j, "clear_square.png");
+		for (int i = 0; i < ROW_AND_COL_DIMENSION; i++) {
+			for (int j = 0; j < ROW_AND_COL_DIMENSION; j++) {
+				Cell currSquare = board.getSquares()[i][j];
+				if (is2LSquare(i, j)) {
+					currSquare = new Cell("2L");
+				} else if (is2WSquare(i, j)) {
+					currSquare = new Cell("2W");
+					// addSquareToBoard(i,j, "square_2W.png");
+				} else if (is3LSquare(i, j)) {
+					currSquare = new Cell("3L");
+					// addSquareToBoard(i,j, "square_3L.png");
+				} else if (is3WSquare(i, j)) {
+					currSquare = new Cell("3W");
+					// addSquareToBoard(i,j, "square_3W.png");
+				} else {
+					currSquare = new Cell();
+					// addSquareToBoard(i,j, "clear_square.png");
+				}
+				addSquareToBoard(i, j, currSquare.getImage());
 			}
 		}
 		boardGrid.setGridLinesVisible(true);
+
+		addSquareToBoard(7, 7, "middle_square.png");
+		enforcedPositions.add(new Position(7,7));
+
+		saveBoard();
+//		saveGrid();
 		
-		insertImage(boardGrid, 7, 7, "middle_square.png");
-		
-		
-		
-		//// LEFT VBOX ////
 		
 		// INPUT FIELD
 		userInput.setPromptText("Type your word here");
@@ -135,80 +178,83 @@ public class Main extends Application {
 		userInput.setPrefHeight(30);
 		userInput.setFont(Font.font("Bahnschrift", 20));
 		userInput.setTextFormatter(new TextFormatter<>((change) -> {
-		    change.setText(change.getText().toUpperCase());
-		    return change;
+			change.setText(change.getText().toUpperCase());
+			return change;
 		}));
+		userInput.setOnKeyReleased(e -> {
+			okBtn.setDisable(userInput.getText().length() < MINIMUM_WORD_LENGTH ? true : false);
+		});
 		userInput.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
 		HBox.setMargin(userInput, new Insets(0, 10, 10, 10));
+
+		userInput.setDisable(true);
 		tfOkCancel.setAlignment(Pos.CENTER_RIGHT);
-		
+
 		// OK BUTTON
 		okBtn.setPrefSize(80, 45);
 		okBtn.setFont(UNIVERSAL_FONT);
 		HBox.setMargin(okBtn, new Insets(0, 0, 10, 0));
-		
+
 		// CANCEL BUTTON
 		cancelBtn.setPrefSize(80, 45);
 		cancelBtn.setFont(UNIVERSAL_FONT);
 		HBox.setMargin(cancelBtn, new Insets(0, 10, 10, 10));
-		
+
 		// PLAYER HAND
 		VBox.setMargin(playerHand, new Insets(10, 20, 0, 20));
-		for (int i = 0; i < 7; i++) {
-			ImageView letter = new ImageView();
-			GridPane.setMargin(letter, LETTER_INSETS);
-			playerHand.add(letter, i,0);
+		for (int i = 0; i < you.getFinalHandSize(); i++) {
+			String imgFile = "letter_" + you.getHand().getEntry(i) + ".png";
+			addLetterToHand(i, imgFile);
+			// ImageView letter = new ImageView();
+			// GridPane.setMargin(letter, LETTER_INSETS);
+			// playerHand.add(letter, i,0);
 		}
-		
-		
-//		ImageView letterA = new ImageView("letter_A.png");
-//		letterA.setFitHeight(60);
-//		letterA.setFitWidth(60);								// for testing purposes
-//		ImageView letterG = new ImageView("letter_G.png");
-//		letterG.setFitHeight(60);
-//		letterG.setFitWidth(60);
-//		
-//		playerHand.add(letterA, 0,0);
-//		GridPane.setMargin(letterA, LETTER_INSETS);
-//		playerHand.add(letterG, 1,0);
-//		GridPane.setMargin(letterG, LETTER_INSETS);
-		
-		
+
+		// ImageView letterA = new ImageView("letter_A.png");
+		// letterA.setFitHeight(60);
+		// letterA.setFitWidth(60); // for testing purposes
+		// ImageView letterG = new ImageView("letter_G.png");
+		// letterG.setFitHeight(60);
+		// letterG.setFitWidth(60);
+		//
+		// playerHand.add(letterA, 0,0);
+		// GridPane.setMargin(letterA, LETTER_INSETS);
+		// playerHand.add(letterG, 1,0);
+		// GridPane.setMargin(letterG, LETTER_INSETS);
+
 		//// RIGHT VBOX ////
 
 		// SCORE PANEL
 		scorePanel.setPrefHeight(200);
+		scorePanel.add(new Label("Your score"), 0, 0);
+		scorePanel.add(new Label("Opponent score"), 1, 0);
+		scorePanel.add(new Label("0"), 0, 1);
+		scorePanel.add(new Label("0"), 1, 1);
 		scorePanel.setGridLinesVisible(true);
-		
+
 		// INSTR DISP
 		instructionDisplay.setEditable(false);
 		VBox.setMargin(instructionDisplay, new Insets(10, 10, 10, 10));
 		instructionDisplay.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-		instructionDisplay.setFont(Font.font("Courier New", 16));
-		instructionDisplay.setText(FIRST_PROMPT);
-		
+		instructionDisplay.setFont(Font.font("Courier New", FontWeight.BLACK, 16));
+		instructionDisplay.setText(stepPrompt());
+		instructionDisplay.setWrapText(true);
+
 		// OPTION BUTTONS
 		optionBtns.setAlignment(Pos.CENTER);
-		
+
 		GridPane.setMargin(playTurnBtn, OPTION_BUTTON_INSETS);
 		playTurnBtn.setPrefSize(120, 90);
 		playTurnBtn.setFont(UNIVERSAL_FONT);
-		playTurnBtn.setOnMouseClicked(e -> {
-			instructionDisplay.setText(PLAY_PROMPT);
-			isTurnChoiceStep = false;
-			isWordTypingStep = true;
-			playTurnBtn.setDisable(true);
-		}
-				);
-		
+
 		exchange1Btn.setPrefSize(120, 90);
 		GridPane.setMargin(exchange1Btn, OPTION_BUTTON_INSETS);
 		exchange1Btn.setFont(UNIVERSAL_FONT);
-		
+
 		exchangeAllBtn.setPrefSize(120, 90);
 		GridPane.setMargin(exchangeAllBtn, OPTION_BUTTON_INSETS);
 		exchangeAllBtn.setFont(UNIVERSAL_FONT);
-		
+
 		skipTurnBtn.setPrefSize(120, 90);
 		GridPane.setMargin(skipTurnBtn, OPTION_BUTTON_INSETS);
 		skipTurnBtn.setFont(UNIVERSAL_FONT);
@@ -216,32 +262,472 @@ public class Main extends Application {
 		quitBtn.setPrefSize(50, 45);
 		VBox.setMargin(quitBtn, new Insets(5, 5, 5, 280));
 		quitBtn.setFont(Font.font("Berlin Sans FB", 14));
-	
-		
-		
-		
-		//// ACTIONS ////
-		
-		okBtn.setDisable(isWordTypingStep ? false : true);
-		quitBtn.setOnAction(e -> System.exit(0));
-		
 
+		//// ACTIONS ////
+
+		playTurnBtn.setOnMouseClicked(e -> {
+			step += 1;
+			instructionDisplay.setText(stepPrompt());
+			// startPlayerTurn(you);
+			// isTurnChoiceStep = false;
+			// isWordTypingStep = true;
+			playTurnBtn.setVisible(false);
+			exchange1Btn.setVisible(false);
+			exchangeAllBtn.setVisible(false);
+			skipTurnBtn.setVisible(false);
+			userInput.setDisable(false);
+			// okBtn.setDisable(false);
+			cancelBtn.setDisable(false);
+		});
+		playTurnBtn.setOnMouseEntered(e -> {
+			instructionDisplay.setText("Play turn");
+		});
+		playTurnBtn.setOnMouseExited(e -> {
+			instructionDisplay.setText(stepPrompt());
+		});
+		playTurnBtn.setVisible(step == 1 ? true : false);
+
+		exchange1Btn.setVisible(step == 1 ? true : false);
+		exchange1Btn.setOnMouseEntered(e -> {
+			instructionDisplay.setText("Exchange one tile");
+		});
+		exchange1Btn.setOnMouseExited(e -> {
+			instructionDisplay.setText(stepPrompt());
+		});
+
+		exchangeAllBtn.setOnMouseEntered(e -> {
+			instructionDisplay.setText("Exchange all tiles");
+		});
+		exchangeAllBtn.setOnMouseExited(e -> {
+			instructionDisplay.setText(stepPrompt());
+		});
+		exchangeAllBtn.setVisible(step == 1 ? true : false);
+
+		skipTurnBtn.setOnMouseEntered(e -> {
+			instructionDisplay.setText("Skip this turn");
+		});
+		skipTurnBtn.setOnMouseExited(e -> {
+			instructionDisplay.setText(stepPrompt());
+		});
+		skipTurnBtn.setVisible(step == 1 ? true : false);
+
+		setupOKBtnActions();
+		setupCancelBtnActions();
 		
-		isTurnChoiceStep = true;
-		isWordTypingStep = false;
-		isLetterPlacingStep = false;
-		rowOrColIsDetermined = false;
-		
+		quitBtn.setOnAction(e -> System.exit(0));
+
+		// isTurnChoiceStep = true;
+		// isWordTypingStep = false;
+		// isLetterPlacingStep = false;
+		// rowOrColIsDetermined = false;
+
 		windowHBox.setStyle(BACKGROUND_COLOR);
 		Scene myScene = new Scene(windowHBox, 800, 600);
-		
+
 		primaryStage.setScene(myScene);
 		primaryStage.setResizable(false);
 		primaryStage.setTitle("Scrabble Game");
 		primaryStage.show();
-		
-		
 	}
+
+
+	
+	
+
+
+
+	private void clearNewlyOccupiedSquares() {
+		while (!you.getPlayerPositions().isEmpty()) {
+			int row = you.getPlayerPositions().getEntry(0).getRow();
+			int col = you.getPlayerPositions().getEntry(0).getCol();
+			addSquareToBoard(row, col, relevantSquareType(row, col));
+			you.getPlayerPositions().remove(0);
+		}
+	}
+
+
+
+	private String relevantSquareType(int r, int c) {
+		if (is2LSquare(r, c)) {
+			return "square_2L.png";
+		} else if (is2WSquare(r, c)) {
+			return "square_2W.png";
+		} else if (is3LSquare(r, c)) {
+			return "square_3L.png";
+		} else if (is3WSquare(r, c)) {
+			return "square_3W.png";
+		} else if (r == 7 && c == 7){
+			return "middle_square.png";
+		}
+		return "clear_square.png";
+	}
+
+
+
+	//// UTILITIES ////
+
+	
+	private void saveBoard() {
+//		for (int i = 0; i < ROW_AND_COL_DIMENSION; i++) {
+//			for (int j = 0; j < ROW_AND_COL_DIMENSION; j++) {
+//				//savedBoardState.getSquares()[i][j] = new Cell();
+//				savedBoardState.getSquares()[i][j] = board.getSquares()[i][j];
+//			}
+//		}
+		savedBoardState = board;
+	}
+	
+//	
+//	private void saveGrid() {
+//		int i = 0;
+//		int j = 0;
+//		for (Node node : boardGrid.getChildren()) {
+//			savedGridAspect.add(new Cell(), j, i);
+//			if (j == ROW_AND_COL_DIMENSION) {
+//				i++;
+//				j = 0;
+//			}
+//		}
+//	}
+//
+//	private void resetBoard() {
+//		for (int i = 0; i < ROW_AND_COL_DIMENSION; i++) {
+//			for (int j = 0; j < ROW_AND_COL_DIMENSION; j++) {
+//				board.getSquares()[i][j] = savedBoardState.getSquares()[i][j];
+//			}
+//		}
+//	}
+//	
+//	private void resetGrid() {
+//		int i = 0;
+//		int j = 0;
+//		for (Node node : savedGridAspect.getChildren()) {
+//			boardGrid.add(node, j, i);
+//		}
+//		if (j == ROW_AND_COL_DIMENSION) {
+//			i++;
+//			j = 0;
+//		}
+//	}
+
+	private void setBoardClickable() {
+		for (int i = 0; i < ROW_AND_COL_DIMENSION; i++) {
+			for (int j = 0; j < ROW_AND_COL_DIMENSION; j++) {
+				letterRow = i;
+				letterCol = j;
+				// Cell currSquare = board.getSquares()[letterRow][letterCol];
+				board.getSquares()[letterRow][letterCol].setOnMouseClicked(e -> {
+					System.exit(0);
+					char currChar = you.getWord().charAt(userWordIndex);
+					board.getSquares()[letterRow][letterCol].setOccupyingLetter(currChar);
+					userWordIndex++;
+					String img = "letter_J.png";
+					// currSquare.setImage(img);
+					addLetterToBoard(letterRow, letterCol, img);
+					// darkenLetterInHand(currChar);
+				});
+			}
+		}
+	}
+
+	// TODO
+	// private void darkenLetterInHand(Character currChar, ImageView newImg) {
+	// boolean foundChar = false;
+	// for (int i = 0; i < 7 && foundChar == false; i++) {
+	// Node currPosInHand = playerHand.getChildren().get(i);
+	// if ((you.getHand().getEntry(i) == currChar)) {
+	// currPosInHand.setEffect(new Lighting());
+	// foundChar = true;
+	// }
+	// }
+	// }
+
+	
+	private Node getNodeFromGridPane(GridPane gridPane, int col, int row) {
+		for (Node node : gridPane.getChildren()) {
+			if (GridPane.getColumnIndex(node) == col && GridPane.getRowIndex(node) == row) {
+				return node;
+			}
+		}
+		return null;
+	}
+
+	
+	private String stepPrompt() {
+		String prompt = "";
+		if (step == 1)
+			prompt = FIRST_PROMPT;
+		if (step == 2)
+			prompt = PLAY_PROMPT;
+		if (step == 3)
+			prompt = PLACE_LETTERS_PROMPT;
+		if (step == 4)
+			prompt = CONFIRM_PROMPT;
+		
+		return prompt;
+	}
+
+	
+	private boolean is2LSquare(int i, int j) {
+		return ((i == 3 && (j == 0 || j == 7 || j == 14)) || (i == 6 && (j == 2 || j == 6 || j == 8 || j == 12))
+				|| (i == 8 && (j == 2 || j == 6 || j == 8 || j == 12)) || (i == 11 && (j == 0 || j == 7 || j == 14))
+				|| (j == 3 && (i == 0 || i == 7 || i == 14)) || (j == 6 && (i == 2 || i == 12))
+				|| (j == 8 && (i == 2 || i == 12)) || (j == 11 && (i == 0 || i == 7 || i == 14)));
+	}
+
+	
+	private boolean is2WSquare(int i, int j) {
+		return (((i == j) || (14 - i == j)) && (i != 0 && i != 14) && (i <= 4 || i >= 10));
+	}
+
+	
+	private boolean is3LSquare(int i, int j) {
+		return ((i == 5 && (j == 1 || j == 5 || j == 9 || j == 13))
+				|| (i == 9 && (j == 1 || j == 5 || j == 9 || j == 13)) || (j == 5 && (i == 1 || i == 13))
+				|| (j == 9 && (i == 1 || i == 13)));
+	}
+	
+	
+	private boolean is3WSquare(int i, int j) {
+		return ((i == 0 && (j == 0 || j == 7 || j == 14)) || (i == 7 && (j == 0 || j == 14))
+				|| (i == 14 && (j == 0 || j == 7 || j == 14)));
+	}
+
+	
+	private void addSquareToBoard(int i, int j, String imgFile) {
+		board.getSquares()[i][j] = new Cell();
+		Cell currSquare = board.getSquares()[i][j];
+		currSquare.setImage(imgFile);
+		boardGrid.add(currSquare, j, i);
+		insertImage(boardGrid, i, j, currSquare.getImage(), true);
+	}
+
+	
+	private void addLetterToHand(int i, String imgFile) {
+		yourHand[i] = new Cell();
+		Cell currLetterSlot = yourHand[i];
+		Character currLetter = you.getHand().getEntry(i);
+		if (currLetter != ' ')
+			currLetterSlot.setImage("letter_" + you.getHand().getEntry(i) + ".png");
+		else
+			currLetterSlot.setImage("letter_blank.png");
+		playerHand.add(currLetterSlot, i, 0);
+		insertImage(playerHand, 0, i, currLetterSlot.getImage(), false);
+	}
+
+	
+	private void addLetterToBoard(int i, int j, String imgFile) {
+		board.getSquares()[i][j] = new Cell();
+		Cell currSquare = board.getSquares()[i][j];
+		currSquare.setImage(imgFile);
+		boardGrid.add(currSquare, j, i);
+		insertImage(boardGrid, i, j, currSquare.getImage(), true);
+	}
+
+	private void insertImage(GridPane grid, int row, int col, String img, boolean boardFormat) {
+		ImageView newImg = new ImageView(new Image(img));
+
+		if (boardFormat) {
+			// if (!newImg.getId().contains("letter_")) {
+			newImg.setOnMouseEntered(e -> {if (step == 3) newImg.setEffect(new Glow(0.8));});
+			newImg.setOnMouseExited(e -> {if (step == 3) newImg.setEffect(new Glow(0));});
+			// }
+			newImg.setFitWidth(30);
+			newImg.setFitHeight(30);
+			grid.setGridLinesVisible(false);
+			grid.add(newImg, col, row);
+			grid.setGridLinesVisible(true);
+		} else if (!boardFormat) {
+			newImg.setFitWidth(60);
+			newImg.setFitHeight(60);
+			grid.setGridLinesVisible(false);
+			grid.add(newImg, col, row);
+			grid.setGridLinesVisible(true);
+		}
+
+		newImg.setOnMouseClicked(e -> {
+			TextArea instrDisp = instructionDisplay;
+			if (step == 3 && (userWordIndex < you.getWord().length())) {
+				letterRow = row;
+				letterCol = col;
+				if ((playerHasLetterInHand() || squareClickedContainsLetter()) &&
+						(userWordIndex == 0 || perClickRestrictionsFollowed())) {
+					Cell currSquare = board.getSquares()[letterRow][letterCol];
+					Character currChar = you.getWord().charAt(userWordIndex++);
+					currSquare.setOccupyingLetter(currChar);
+					String image = currSquare.getImage();
+					addLetterToBoard(letterRow, letterCol, image);
+					// darkenLetterInHand(currChar, newImg); TODO
+					// condition: only add to player positions if clicked square was not already
+					// occupied with a letter
+					you.addToPlayerPositions(new Position(letterRow, letterCol));
+					// only place letter on board if 
+				}
+			}
+			
+			if (step == 3 && userWordIndex == you.getWord().length()) {
+				if (perTurnRestrictionsFollowed()) {
+					step = 4;
+					okBtn.setDisable(false);
+					instrDisp.setText(stepPrompt());
+				}
+			}
+		});
+	}
+	
+
+	private boolean squareClickedContainsLetter() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private boolean playerHasLetterInHand() {
+		Character currWordChar = you.getWord().charAt(userWordIndex);
+		Integer subarrayFirstIndex = 0;
+		if (placedLettersTracker.contains(currWordChar))
+			subarrayFirstIndex = placedLettersTracker.getValue(currWordChar) + 1;
+		
+		for (int i = subarrayFirstIndex; i < 7; i++) {
+			Character currLetter = you.getHand().getEntry(i);
+			if (currLetter == currWordChar || currLetter == ' ') {
+				placedLettersTracker.add(currLetter, i);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean perClickRestrictionsFollowed() {
+		boolean adjacent = false;
+		boolean continuous = false;
+		// getEntry parameter unsure
+		int lastPositionIndex = you.getPlayerPositions().getLength() - 1;
+		Position lastPlayerPosition = you.getPlayerPositions().getEntry(lastPositionIndex);
+		
+		// 1: check adjacency
+		if ((letterRow == lastPlayerPosition.getRow() + 1 && letterCol == lastPlayerPosition.getCol()) 
+				|| (letterCol == lastPlayerPosition.getCol() + 1 && letterRow == lastPlayerPosition.getRow())) {
+			adjacent = true;
+		}
+		
+		if (userWordIndex >= 2) {
+			int firstLetterRow = you.getPlayerPositions().getEntry(lastPositionIndex - 1).getRow();
+			int firstLetterCol = you.getPlayerPositions().getEntry(lastPositionIndex - 1).getCol();
+			int secondLetterRow = you.getPlayerPositions().getEntry(lastPositionIndex).getRow();
+			int secondLetterCol = you.getPlayerPositions().getEntry(lastPositionIndex).getCol();
+			if (firstLetterRow == secondLetterRow)
+				continuous = (letterCol == secondLetterCol + 1);
+			else if (firstLetterCol == secondLetterCol)
+				continuous = (letterRow == secondLetterRow + 1);
+		} else if (userWordIndex < 2)
+			continuous = true;
+		// 2a: (if second letter) check that letter is on same row or same column
+		// 2b: (if more than second letter) check that letter is placed exactly on the intended
+		// square
+		return adjacent && continuous;
+	}
+
+	private boolean perTurnRestrictionsFollowed() {
+		// 1: (if first turn) check that one letter is on the star square
+		//if (firstTurn == true) {
+			return checkPlacementUsesAtLeastOneEnforcedPosition();
+		//}
+		// 2: (otherwise) check that at least one letter uses letter already on board
+//		else {
+//			
+//		}
+//		return false;
+	}
+
+	private boolean checkPlacementUsesAtLeastOneEnforcedPosition() {
+		int playerPosLength = you.getPlayerPositions().getLength();
+		int enforcedPosLength = enforcedPositions.getLength();
+		for (int i = 0; i < playerPosLength; i++) {
+			for (int j = 0; j < enforcedPosLength; j++) {
+				if (you.getPlayerPositions().getEntry(i).toString()
+						.equals(enforcedPositions.getEntry(j).toString())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private void setupOKBtnActions() {
+		okBtn.setDisable(true);
+		okBtn.setOnAction(e -> {
+			you.setWord(userInput.getText());
+			if (step == 2) {
+				if (dictionary.containsWord(you.getWord())) {
+					step = 3;
+					// userInput.clear();
+					userInput.setDisable(true);
+					okBtn.setDisable(true);
+					// setBoardClickable();
+					
+					// for (int i = 0; i < ROW_AND_COL_DIMENSION; i++) {
+					// for (int j = 0; j < ROW_AND_COL_DIMENSION; j++) {
+					// letterRow = i;
+					// letterCol = j;
+					// //Cell currSquare = board.getSquares()[letterRow][letterCol];
+					// board.getSquares()[letterRow][letterCol].setOnMouseClicked(event -> {
+					// System.exit(0);
+					// char currChar = you.getWord().charAt(userWordIndex);
+					// board.getSquares()[letterRow][letterCol].setOccupyingLetter(currChar);
+					// userWordIndex++;
+					// String img = "letter_J.png";
+					// //currSquare.setImage(img);
+					// addLetterToBoard(letterRow,letterCol, img);
+					// darkenLetterInHand(currChar);
+					// });
+					// }
+					// }
+					
+					instructionDisplay.setText(stepPrompt());
+				} else {
+					instructionDisplay.setText("! Word is not in the dictionary !");
+				}
+			} else if (step == 4) {
+				// confirm the word
+			}
+		});
+	}
+
+	private void setupCancelBtnActions() {
+		cancelBtn.setDisable(true);
+		cancelBtn.setOnAction(e -> {
+			if (step == 2) {
+				step = 1;
+				userInput.clear();
+				userInput.setDisable(true);
+				instructionDisplay.setText(stepPrompt());
+				okBtn.setDisable(true);
+				playTurnBtn.setVisible(true);
+				exchange1Btn.setVisible(true);
+				exchangeAllBtn.setVisible(true);
+				skipTurnBtn.setVisible(true);
+				cancelBtn.setDisable(true);
+			} else if (step == 3) {
+				step = 2;
+				userInput.setDisable(false);
+				instructionDisplay.setText(stepPrompt());
+				userWordIndex = 0;
+				placedLettersTracker = new ArrayDictionary<>();
+				clearNewlyOccupiedSquares();
+//				resetBoard();
+//				resetGrid();
+			} else if (step == 4) {
+				step = 3;
+				instructionDisplay.setText(stepPrompt());
+				userWordIndex = 0;
+				placedLettersTracker.clear();
+				clearNewlyOccupiedSquares();
+				okBtn.setDisable(true);
+			}
+		});		
+	}
+	
+	
 	
 	public static void main(String[] args) {
 		launch(args);
