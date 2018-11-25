@@ -164,3 +164,33 @@ Naishvi and Mathieu
 - Double/Triple word and letter was deleted due to time limitations
 - Understanding how to connect with the server
 - Using SceneBuilder to create a user interface is more challenging and time-consuming than expected
+
+## Week 5 (Nov 26 - Nov 29)
+
+### What did your team do last week?
+- Together: 
+    - Created the board without using scene builder
+    - Finished the complete layout of the GUI
+    - Getting the program to quit
+
+- Naishvi: 
+    - Gave the player a random hand 
+    - Translated the char letter into its corresponding image in the GUI
+    - Test the behavior of the user inputs with the dictionary and value of the word created 
+- Mathieu
+    - Created board and the buttons
+    - Added examples of what the letter will display as 
+    - Improved game logic to make player able to play a full turn (assuming they hit "Play")
+
+### What will you do this week?
+- Together: 
+    - Finish Testing 
+    - Finish Client Server Connection 
+- Naishvi: 
+    - Work on the client server implementation  
+
+- Mathieu: 
+    - Work on getting the user word to display on the board 
+
+### Any blocking issues/challenges need to be addressed?
+- Understanding how to connect with the server
