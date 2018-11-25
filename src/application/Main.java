@@ -36,8 +36,8 @@ public class Main extends Application {
 	public static final Insets LETTER_INSETS = new Insets(2, 2, 2, 2);
 	public static final Insets OPTION_BUTTON_INSETS = new Insets(5, 5, 5, 5);
 	public static HashMap<Character, String> letterImage; 
-    boolean start = false; 
-
+	//boolean start = true; 
+	char [] PlayerLetters = new char[7]; 
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -120,68 +120,69 @@ public class Main extends Application {
 			playerHand.add(letter, i,0);
 		}
 
+
+		//if(start == true) {
+			//Adding the letter at the start of the game
+
+			for(int i= 0; i<= 6; i++) {
+				char playerLetters = LetterBag.shuffledArray[i]; 
+				System.out.println(playerLetters);
+				PlayerLetters[i] = playerLetters; 
+			}
+
+			//}
+
+			//Letters in players hand
+			//Letter1
+			int i1 = 0; 
+			ImageView letter1 = new ImageView(LetterBag.getBag(PlayerLetters[i1]));
+			letter1.setFitHeight(40);
+			letter1.setFitWidth(40); 
+			playerHand.add(letter1, 0, 0);
+			GridPane.setMargin(letter1, LETTER_INSETS);
+			//Letter2
+			int i2 = 1; 
+			ImageView letter2 = new ImageView(LetterBag.getBag(PlayerLetters[i2]));
+			letter2.setFitHeight(40);
+			letter2.setFitWidth(40); 
+			playerHand.add(letter2, 1, 0);
+			GridPane.setMargin(letter2, LETTER_INSETS);
+			//Letter3
+			int i3 = 2; 
+			ImageView letter3 = new ImageView(LetterBag.getBag(PlayerLetters[i3]));
+			letter3.setFitHeight(40);
+			letter3.setFitWidth(40); 
+			playerHand.add(letter3, 2, 0);
+			GridPane.setMargin(letter1, LETTER_INSETS);
+			//Letter4
+			int i4 = 3; 
+			ImageView letter4 = new ImageView(LetterBag.getBag(PlayerLetters[i4]));
+			letter4.setFitHeight(40);
+			letter4.setFitWidth(40); 
+			playerHand.add(letter4, 3, 0);
+			GridPane.setMargin(letter4, LETTER_INSETS);
+			//Letter5
+			int i5 = 4; 
+			ImageView letter5 = new ImageView(LetterBag.getBag(PlayerLetters[i5]));
+			letter5.setFitHeight(40);
+			letter5.setFitWidth(40); 
+			playerHand.add(letter5, 4, 0);
+			GridPane.setMargin(letter5, LETTER_INSETS);
+			//Letter6
+			int i6 = 5; 
+			ImageView letter6 = new ImageView(LetterBag.getBag(PlayerLetters[i6]));
+			letter6.setFitHeight(40);
+			letter6.setFitWidth(40); 
+			playerHand.add(letter6, 5, 0);
+			GridPane.setMargin(letter6, LETTER_INSETS);
+			//Letter7
+			int i7 = 6; 
+			ImageView letter7 = new ImageView(LetterBag.getBag(PlayerLetters[i7]));
+			letter7.setFitHeight(40);
+			letter7.setFitWidth(40); 
+			playerHand.add(letter7, 6, 0);
+			GridPane.setMargin(letter7, LETTER_INSETS);
 		
-		if(start == true) {
-		//Adding the letter at the start of the game
-		char [] PlayerLetters = new char[7]; 
-		for(int i= 0; i<= 6; i++) {
-			char playerLetters = LetterBag.shuffledArray[i]; 
-			System.out.println(playerLetters);
-			PlayerLetters[i] = playerLetters; 
-
-		}
-
-		//Letters in players hand
-		//Letter1
-		int i1 = 0; 
-		ImageView letter1 = new ImageView(LetterBag.getBag(PlayerLetters[i1]));
-		letter1.setFitHeight(40);
-		letter1.setFitWidth(40); 
-		playerHand.add(letter1, 0, 0);
-		GridPane.setMargin(letter1, LETTER_INSETS);
-		//Letter2
-		int i2 = 1; 
-		ImageView letter2 = new ImageView(LetterBag.getBag(PlayerLetters[i2]));
-		letter2.setFitHeight(40);
-		letter2.setFitWidth(40); 
-		playerHand.add(letter2, 1, 0);
-		GridPane.setMargin(letter2, LETTER_INSETS);
-		//Letter3
-		int i3 = 2; 
-		ImageView letter3 = new ImageView(LetterBag.getBag(PlayerLetters[i3]));
-		letter3.setFitHeight(40);
-		letter3.setFitWidth(40); 
-		playerHand.add(letter3, 2, 0);
-		GridPane.setMargin(letter1, LETTER_INSETS);
-		//Letter4
-		int i4 = 3; 
-		ImageView letter4 = new ImageView(LetterBag.getBag(PlayerLetters[i4]));
-		letter4.setFitHeight(40);
-		letter4.setFitWidth(40); 
-		playerHand.add(letter4, 3, 0);
-		GridPane.setMargin(letter4, LETTER_INSETS);
-		//Letter5
-		int i5 = 4; 
-		ImageView letter5 = new ImageView(LetterBag.getBag(PlayerLetters[i5]));
-		letter5.setFitHeight(40);
-		letter5.setFitWidth(40); 
-		playerHand.add(letter5, 4, 0);
-		GridPane.setMargin(letter5, LETTER_INSETS);
-		//Letter6
-		int i6 = 5; 
-		ImageView letter6 = new ImageView(LetterBag.getBag(PlayerLetters[i6]));
-		letter6.setFitHeight(40);
-		letter6.setFitWidth(40); 
-		playerHand.add(letter6, 5, 0);
-		GridPane.setMargin(letter6, LETTER_INSETS);
-		//Letter7
-		int i7 = 6; 
-		ImageView letter7 = new ImageView(LetterBag.getBag(PlayerLetters[i7]));
-		letter7.setFitHeight(40);
-		letter7.setFitWidth(40); 
-		playerHand.add(letter7, 6, 0);
-		GridPane.setMargin(letter7, LETTER_INSETS);
-		}
 
 
 
@@ -236,10 +237,23 @@ public class Main extends Application {
 
 		okBtn.setOnAction(e -> {
 			String word = userInput.getText(); 
-			if(Dictionary.containsWord(word)==true) {
+			char [] wordArray = word.toCharArray(); 
+			boolean contains = true; 
+			for(int i =0; i<= wordArray.length; i++) {
+				for(int j = 0; j< 7; j++) {
+					if(wordArray[j] == PlayerLetters[i]) {
+						contains = true; 
+					}
+
+					
+				}
+
+			}
+
+			if((Dictionary.containsWord(word)==true) && (contains == true)) {
 				Player.getValOfWord(word); 
 			} 
-			else {
+			else if((Dictionary.containsWord(word)==false) && (contains == true)) {
 				Alert errorAlert = new Alert(AlertType.ERROR);
 				errorAlert.setHeaderText("Invalid word");
 				errorAlert.setContentText("The word is not in the dictionary. Try again.");

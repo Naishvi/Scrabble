@@ -26,7 +26,6 @@ public class Dictionary {
 
 	public static boolean containsWord(String playerWord) {	
 		if (dictionary.contains(playerWord)) {
-			System.out.println("Yes the word is in the dictionary!");
 			return true;
 		}
 		else
