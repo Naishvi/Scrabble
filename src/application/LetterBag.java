@@ -88,7 +88,7 @@ public class LetterBag {
 		return letterValue.get(letter);
 	}
 	
-	public Character getOneLetter() {
+	public Character fetchOneLetter() {
 		numberOfLetters--;
 		return allLetters.remove(0);
 	}
@@ -97,7 +97,7 @@ public class LetterBag {
 	public static void main(String[] args) {
 		LetterBag letters = new LetterBag();
 		for (int i = 0; i < CAPACITY; i++) {
-			Character myLetter = letters.getOneLetter();
+			Character myLetter = letters.fetchOneLetter();
 			System.out.println(myLetter + "(" + letters.getValueOf(myLetter) + ")");
 		}
 		

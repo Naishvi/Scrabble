@@ -13,6 +13,8 @@ public class Player extends LetterBag {
 	private LinkedList<Character> hand;
 	private static final int MAX_HAND_SIZE = 7;
 	private LinkedList<Position> currPlacement;
+	private int jokerCount; // refreshed at every action, even cancellable ones
+	private int originalJokerCount; // actual number of jokers before/after turn
 	
 	public Player(LetterBag letters) {
 		String currWord = "";
@@ -23,7 +25,12 @@ public class Player extends LetterBag {
 
 	public void addLettersToHand(LetterBag letterBag) {
 		while (hand.getLength() < MAX_HAND_SIZE) {
-			hand.add(letterBag.getOneLetter());
+			Character currLetter = letterBag.fetchOneLetter();
+			getHand().add(currLetter);
+			if (currLetter == ' ') {
+				addToJokerCount(1);
+				addToActualJokerCount(1);
+			}
 		}
 	}
 
@@ -45,6 +52,30 @@ public class Player extends LetterBag {
 	
 	public boolean handIsFull() {
 		return hand.getLength() == MAX_HAND_SIZE;
+	}
+	
+	public int getJokerCount() {
+		return jokerCount;
+	}
+	
+	public void setJokerCount(int value) {
+		jokerCount = value;
+	}
+	
+	public void addToJokerCount(int value) {
+		jokerCount += value;
+	}
+	
+	public int getActualJokerCount() {
+		return originalJokerCount;
+	}
+	
+	public void setActualJokerCount(int value) {
+		originalJokerCount = value;
+	}
+	
+	public void addToActualJokerCount(int value) {
+		originalJokerCount += value;
 	}
 	
 	public void addToPlayerPositions(Position pos) {

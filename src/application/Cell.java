@@ -39,6 +39,7 @@ public class Cell extends GridPane {
 		hasBonus = true;
 		this.bonusMult = bonusMult;
 		this.bonusType = bonusType;
+		fullBonus = fb;
 
 		if (bonusMult == 2) {
 			if (bonusType == 'L')
@@ -74,12 +75,19 @@ public class Cell extends GridPane {
 	}
 	
 	public String getBonus() {
-		return ("" + bonusMult + bonusType);
+		return fullBonus;
 	}
 	
 	public void setBonus(String bonus) {
+		fullBonus = bonus;
 		bonusMult = Integer.parseInt(bonus.substring(0, 1));
 		bonusType = bonus.charAt(1);
+		hasBonus = true;
+	}
+	
+	public void consumeBonus() {
+		hasBonus = false;
+		fullBonus = "";
 	}
 
 	public Character getLetter() {
@@ -114,16 +122,13 @@ public class Cell extends GridPane {
 		hiddenImage = newHiddenImage;
 	}
 	
-	public String getFullBonus() {
-		return fullBonus;
-	}
-	
 	public void setFullBonus(String fb) {
 		fullBonus = fb;
 	}
 	
 	public String toString() {
-		return position.toString() + ", " + occupyingLetter + (hasBonus() ? ", Bonus:" + getBonus() : "");
+		return /*position.toString() + ", " + */occupyingLetter 
+				+ (hasBonus() ? ", Bonus: " + getBonus() : "");
 	}
 	
 

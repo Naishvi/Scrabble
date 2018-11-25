@@ -1,8 +1,6 @@
 package application;
 
-import LinkedBag.Node;
-
-public class LinkedList<T> implements ListInterface<T> {
+public class LinkedList<T> {
 	private Node firstNode;
 	private boolean initialized = false;
 
