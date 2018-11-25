@@ -4,8 +4,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class LetterBag {
-	HashMap<Character, Integer> letterValue;
-	private static final int capacity = 108;
+	private HashMap<Character, Integer> letterValue;
+	private LinkedList<Character> allLetters;
+	private static final int CAPACITY = 100;
 	private int numberOfLetters;
 
 	private char[] letterArray = { 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'D', 'D',
@@ -16,7 +17,14 @@ public class LetterBag {
 
 	public LetterBag() {
 		letterValue = new HashMap<>();
-
+		allLetters = new LinkedList<>();
+		constructHashmap();
+		fillBag();
+		numberOfLetters = CAPACITY;
+		allLetters.shuffle();
+	}
+	
+	private void constructHashmap() {
 		letterValue.put('A', 1);
 		letterValue.put('B', 3);
 		letterValue.put('C', 3);
@@ -45,8 +53,53 @@ public class LetterBag {
 		letterValue.put('Z', 10);
 		letterValue.put(' ', 0);
 	}
+	
+	private void fillBag() {
+		allLetters.addMultiple('A', 9);
+		allLetters.addMultiple('B', 2);
+		allLetters.addMultiple('C', 2);
+		allLetters.addMultiple('D', 4);
+		allLetters.addMultiple('E', 12);
+		allLetters.addMultiple('F', 2);
+		allLetters.addMultiple('G', 3);
+		allLetters.addMultiple('H', 2);
+		allLetters.addMultiple('I', 9);
+		allLetters.addMultiple('J', 1);
+		allLetters.addMultiple('K', 1);
+		allLetters.addMultiple('L', 4);
+		allLetters.addMultiple('M', 2);
+		allLetters.addMultiple('N', 6);
+		allLetters.addMultiple('O', 8);
+		allLetters.addMultiple('P', 2);
+		allLetters.addMultiple('Q', 1);
+		allLetters.addMultiple('R', 6);
+		allLetters.addMultiple('S', 4);
+		allLetters.addMultiple('T', 6);
+		allLetters.addMultiple('U', 4);
+		allLetters.addMultiple('V', 2);
+		allLetters.addMultiple('W', 2);
+		allLetters.addMultiple('X', 1);
+		allLetters.addMultiple('Y', 2);
+		allLetters.addMultiple('Z', 1);
+		allLetters.addMultiple(' ', 2);
+	}
 
-	public int getValue(Character letter) {
+	public int getValueOf(Character letter) {
 		return letterValue.get(letter);
+	}
+	
+	public Character fetchOneLetter() {
+		numberOfLetters--;
+		return allLetters.remove(0);
+	}
+	
+	
+	public static void main(String[] args) {
+		LetterBag letters = new LetterBag();
+		for (int i = 0; i < CAPACITY; i++) {
+			Character myLetter = letters.fetchOneLetter();
+			System.out.println(myLetter + "(" + letters.getValueOf(myLetter) + ")");
+		}
+		
 	}
 }
