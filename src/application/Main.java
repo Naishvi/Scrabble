@@ -70,6 +70,7 @@ public class Main extends Application {
 	Button skipTurnBtn;
 	ArrayDictionary<Character, Integer> placedLettersTracker;
 	LinkedList<Character> jokerUseDeterminer;
+	public static boolean quit = false;
 	
 	Player you;
 	Cell[] yourHand;
@@ -319,7 +320,7 @@ public class Main extends Application {
 		setupOKBtnActions();
 		setupCancelBtnActions();
 		
-		quitBtn.setOnAction(e -> System.exit(0));
+		quitBtn.setOnAction(e -> {quit = true; System.exit(0);});
 
 		windowHBox.setStyle(BACKGROUND_COLOR);
 		Scene myScene = new Scene(windowHBox, 800, 600);
@@ -610,14 +611,15 @@ public class Main extends Application {
 					instructionDisplay.setText(stepPrompt());
 				}
 			}
+			System.out.println(userWordIndex + " on " + (you.getWord().length()) + " (indices)");
 		});
 	}
 
 	private boolean userClickedOnNewSquarePosition() {
 		Position clickedPosition = new Position(letterRow, letterCol);
-		LinkedList<Position> playerPositions = you.getPlayerPositions();
+		LinkedList<Position> alreadyClicked = you.getPlayerPositions();
 		
-		for (int i = 0; i < playerPositions.getLength(); i++) {
+		for (int i = 0; i < alreadyClicked.getLength(); i++) {
 			Position currPos = you.getPlayerPositions().getEntry(i);
 			if (currPos.toString().equals(clickedPosition.toString()))
 				return false;
@@ -776,7 +778,7 @@ public class Main extends Application {
 	}
 
 	private void refreshEnforcedPositions() {
-		for (int i = 0; i < you.getPlayerPositions().getLength(); i++) {
+		for (int i = 0; i < you.getLetterPlacements().getLength(); i++) {
 			enforcedPositions.add(you.getLetterPlacements().remove(0));
 		}
 	}
