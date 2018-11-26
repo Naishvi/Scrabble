@@ -3,10 +3,13 @@ package core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+
+import application.LetterTile;
 
 public class Player extends LetterBag {
 	static LetterBag letterValue = new LetterBag(); 

@@ -6,10 +6,11 @@ import java.util.HashSet;
 import java.util.Scanner;
 
 public class Dictionary {
-	static HashSet<String> dictionary = new HashSet<>(); 
-	public Dictionary() {
+	private HashSet<String> dictionary = new HashSet<>(); 
+	
+	public Dictionary(String dictionaryFileName) {
 		 
-		String fName = "Dictionary.txt";
+		String fName = dictionaryFileName;
 
 		try (Scanner dictionaryFile = new Scanner(new File(fName))) {
 			while(dictionaryFile.hasNextLine()) {
@@ -24,7 +25,7 @@ public class Dictionary {
 
 	}
 
-	public static boolean containsWord(String playerWord) {	
+	public boolean containsWord(String playerWord) {	
 		if (dictionary.contains(playerWord)) {
 			return true;
 		}
@@ -35,3 +36,5 @@ public class Dictionary {
 	
 
 }
+
+
