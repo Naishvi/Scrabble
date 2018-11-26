@@ -1,5 +1,7 @@
 package application;
 
+import java.awt.List;
+
 public class LinkedList<T> {
 	private Node firstNode;
 	private boolean initialized = false;
@@ -86,6 +88,7 @@ public class LinkedList<T> {
 		return numEntries;
 	}
 
+	
 	public boolean remove(T anEntry) {
 		Node currNode;
 		int index = 0;

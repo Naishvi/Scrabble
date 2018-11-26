@@ -12,7 +12,10 @@ public class Player extends LetterBag {
 	private String currWord;
 	private LinkedList<Character> hand;
 	private static final int MAX_HAND_SIZE = 7;
-	private LinkedList<Position> currPlacement;
+	private LinkedList<Position> letterPlacements; // only keeps track of squares where player
+												   // placed a letter
+	private LinkedList<Position> validClicksSequence; // keeps track of all squares clicked
+													  // to determine placement validity
 	private int jokerCount; // refreshed at every action, even cancellable ones
 	private int originalJokerCount; // actual number of jokers before/after turn
 	
@@ -20,7 +23,8 @@ public class Player extends LetterBag {
 		String currWord = "";
 		hand = new LinkedList<>();
 		addLettersToHand(letters);
-		currPlacement = new LinkedList<>();
+		letterPlacements = new LinkedList<>();
+		validClicksSequence = new LinkedList<>();
 	}
 
 	public void addLettersToHand(LetterBag letterBag) {
@@ -79,11 +83,19 @@ public class Player extends LetterBag {
 	}
 	
 	public void addToPlayerPositions(Position pos) {
-		currPlacement.add(pos);
+		validClicksSequence.add(pos);
 	}
 	
 	public LinkedList<Position> getPlayerPositions() {
-		return currPlacement;
+		return validClicksSequence;
+	}
+	
+	public void addToLetterPlacements(Position pos) {
+		letterPlacements.add(pos);
+	}
+	
+	public LinkedList<Position> getLetterPlacements() {
+		return letterPlacements;
 	}
 	
 	private boolean wordIsInDictionary(Scanner dictionary) {
