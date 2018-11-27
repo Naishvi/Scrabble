@@ -93,6 +93,10 @@ public class LetterBag {
 		return allLetters.remove(0);
 	}
 	
+	public void putBackLetter(Character letter) {
+		allLetters.add(letter);
+	}
+	
 	
 	public static void main(String[] args) {
 		LetterBag letters = new LetterBag();

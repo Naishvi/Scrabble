@@ -36,9 +36,26 @@ public class Client {
 				System.out.println("Connected");
 			}
 			catch(Exception e){
+				
 			}
 		}
 		socket.close(); 
 
+	}
+	
+	public String toStringEncoded(LinkedList<Position> enforcedPos, Board board) {
+		String encodeString = "";
+		// LinkedList of positions enforcedPositions (Main.java) always happens
+		// to have a duplicate entry at the beginning. It should be removed
+		enforcedPos.remove(new Position(7, 7));
+		for (int i = 0; i < enforcedPos.getLength(); i++) {
+			Position aPos = enforcedPos.getEntry(i);
+			int posRow = aPos.getRow();
+			int posCol = aPos.getCol();
+			Character charAtPos = board.getSquares()[posRow][posCol].getLetter();
+			String toConcatenate = charAtPos + "," + posRow + "," + posCol;
+			encodeString += toConcatenate + (i < enforcedPos.getLength() - 1 ? "|" : "");
+		}
+		return encodeString;
 	}
 }
