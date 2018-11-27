@@ -13,35 +13,50 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.net.*;
 public class Client {
+	public static int col; 
+	public static int row; 
 	public static void main(String [] args) throws Exception{
-
+		LetterBag letterBag = new LetterBag();
 		String IP = "localhost"; 
 		int port = 5000; 
-		DataInputStream input = null;
-		DataOutputStream output = null;
-		Socket clientSocket = new Socket(IP, port); 
-		File board = new File("Board.java"); 
-		
+		Socket clientSocket = new Socket(IP, port);
+		String word = "Letter";
+		String modifiedSentence = "T 4,2|O 5,2|E 6,2"; 
+		String update = null; 
 		while(Main.Quit != true) {
 			try {
-				PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-				BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-				BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in)); 
+	
+				DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream()); 
+				BufferedReader fromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); 
 				
-				// Create a BufferedReader to read a line at a time.
-				InputStream is = clientSocket.getInputStream();
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
-
-				// Read greeting from the server.
-				String response = br.readLine();
-				System.out.println(response);
-				if (!response.startsWith("220")) {
-					throw new Exception("220 reply not received from server.");
+				
+				
+				//Encode
+				char[] clientWord = word.toCharArray(); 
+				for(int i = 0; i < clientWord.length; i++) {
+					int X; //get X postion 
+					int Y; //get Y postion 
+					String position = "[i],X,Y|"; 
+					update = update + position; 
 				}
-				// Get a reference to the socket's output stream.
-				OutputStream os = clientSocket.getOutputStream();
-
+				out.writeBytes(word + '\n');
+				modifiedSentence = fromServer.readLine(); 
+				
+				
+				
+				
+				
+				//Update the board from the ServerInput 
+				//Decode
+				String[] letters = modifiedSentence.split("|"); 
+				//[("T,4,2"), ("O,5,2"), ("E,6,2")]
+				for(int i = 0; i< letters.length; i++) {
+					String[] positionOfLetter = letters[i].split(",");
+					 letterBag.letterImage.get(positionOfLetter[0]);  
+					 col = Integer.parseInt(positionOfLetter[1]); 
+					 row = Integer.parseInt(positionOfLetter[2]); 
+				}
+				
 				System.out.println("Connected");
 			}
 			catch(Exception e){

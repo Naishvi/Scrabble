@@ -1,17 +1,25 @@
 package application;
 
+
 import java.util.HashMap;
 
+import java.util.List;
+
+
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
@@ -66,10 +74,13 @@ public class Main extends Application {
 	Button exchangeAllBtn;
 	Button skipTurnBtn;
 	ArrayDictionary<Character, Integer> placedLettersTracker;
+	LinkedList<Character> jokerUseDeterminer;
 	
 	Player you;
 	Cell[] yourHand;
-	GridPane playerHand;
+	
+	ObservableList handCharacters;
+	ListView playerHand;
 	Player opponent;
 
 	int step;
@@ -91,6 +102,7 @@ public class Main extends Application {
 		dictionary = new Dictionary("Dictionary.txt");
 		enforcedPositions = new LinkedList<>();
 		placedLettersTracker = new ArrayDictionary<>();
+		jokerUseDeterminer = new LinkedList<>();
 
 		you = new Player(letterBag);
 		yourHand = new Cell[you.getFinalHandSize()];
@@ -111,7 +123,7 @@ public class Main extends Application {
 					okBtn = new Button("OK");
 					cancelBtn = new Button("Cancel");
 				tfOkCancel.getChildren().addAll(userInput, okBtn, cancelBtn); // adding
-				playerHand = new GridPane();
+				playerHand = new ListView<>();
 			leftVBox.getChildren().addAll(boardGrid, tfOkCancel, playerHand); // adding
 			VBox rightVBox = new VBox();
 				GridPane scorePanel = new GridPane();
@@ -140,21 +152,21 @@ public class Main extends Application {
 			for (int j = 0; j < ROW_AND_COL_DIMENSION; j++) {
 				Cell currSquare = board.getSquares()[i][j];
 				if (is2LSquare(i, j)) {
-					currSquare = new Cell("2L");
+					board.getSquares()[i][j] = new Cell("2L");
 				} else if (is2WSquare(i, j)) {
-					currSquare = new Cell("2W");
+					board.getSquares()[i][j] = new Cell("2W");
 					// addSquareToBoard(i,j, "square_2W.png");
 				} else if (is3LSquare(i, j)) {
-					currSquare = new Cell("3L");
+					board.getSquares()[i][j] = new Cell("3L");
 					// addSquareToBoard(i,j, "square_3L.png");
 				} else if (is3WSquare(i, j)) {
-					currSquare = new Cell("3W");
+					board.getSquares()[i][j] = new Cell("3W");
 					// addSquareToBoard(i,j, "square_3W.png");
 				} else {
-					currSquare = new Cell();
+					board.getSquares()[i][j] = new Cell();
 					// addSquareToBoard(i,j, "clear_square.png");
 				}
-				addSquareToBoard(i, j, currSquare.getImage());
+				addSquareToBoard(i, j, board.getSquares()[i][j].getImage());
 			}
 		}
 		boardGrid.setGridLinesVisible(true);
@@ -195,7 +207,11 @@ public class Main extends Application {
 		HBox.setMargin(cancelBtn, new Insets(0, 10, 10, 10));
 
 		// PLAYER HAND
-		VBox.setMargin(playerHand, new Insets(10, 20, 0, 20));
+		playerHand.setOrientation(Orientation.HORIZONTAL);
+		//playerHand.getItems().get(0);
+//		playerHand.setPrefHeight(60);
+//		playerHand.setPrefWidth(420);
+		VBox.setMargin(playerHand, new Insets(10, 20, 10, 20));
 		for (int i = 0; i < you.getFinalHandSize(); i++) {
 			String imgFile = "letter_" + you.getHand().getEntry(i) + ".png";
 			addLetterToHand(i, imgFile);
@@ -248,7 +264,7 @@ public class Main extends Application {
 		//// ACTIONS ////
 
 		playTurnBtn.setOnMouseClicked(e -> {
-			step += 1;
+			step = 2;
 			instructionDisplay.setText(stepPrompt());
 			// startPlayerTurn(you);
 			// isTurnChoiceStep = false;
@@ -315,11 +331,11 @@ public class Main extends Application {
 
 
 	private void clearNewlyOccupiedSquares() {
-		while (!you.getPlayerPositions().isEmpty()) {
-			int row = you.getPlayerPositions().getEntry(0).getRow();
-			int col = you.getPlayerPositions().getEntry(0).getCol();
+		while (!you.getLetterPlacements().isEmpty()) {
+			int row = you.getLetterPlacements().getEntry(0).getRow();
+			int col = you.getLetterPlacements().getEntry(0).getCol();
 			addSquareToBoard(row, col, relevantSquareImage(row, col));
-			you.getPlayerPositions().remove(0);
+			you.getLetterPlacements().remove(0);
 		}
 	}
 
@@ -361,38 +377,37 @@ public class Main extends Application {
 		savedBoardState = board;
 	}
 	
-//	
-//	private void saveGrid() {
-//		int i = 0;
-//		int j = 0;
-//		for (Node node : boardGrid.getChildren()) {
-//			savedGridAspect.add(new Cell(), j, i);
-//			if (j == ROW_AND_COL_DIMENSION) {
-//				i++;
-//				j = 0;
-//			}
-//		}
-//	}
-//
-//	private void resetBoard() {
-//		for (int i = 0; i < ROW_AND_COL_DIMENSION; i++) {
-//			for (int j = 0; j < ROW_AND_COL_DIMENSION; j++) {
-//				board.getSquares()[i][j] = savedBoardState.getSquares()[i][j];
-//			}
-//		}
-//	}
-//	
-//	private void resetGrid() {
-//		int i = 0;
-//		int j = 0;
-//		for (Node node : savedGridAspect.getChildren()) {
-//			boardGrid.add(node, j, i);
-//		}
-//		if (j == ROW_AND_COL_DIMENSION) {
-//			i++;
-//			j = 0;
-//		}
-//	}
+	private void saveGrid() {
+		int i = 0;
+		int j = 0;
+		for (Node node : boardGrid.getChildren()) {
+			savedGridAspect.add(new Cell(), j, i);
+			if (j == ROW_AND_COL_DIMENSION) {
+				i++;
+				j = 0;
+			}
+		}
+	}
+
+	private void resetBoard() {
+		for (int i = 0; i < ROW_AND_COL_DIMENSION; i++) {
+			for (int j = 0; j < ROW_AND_COL_DIMENSION; j++) {
+				board.getSquares()[i][j] = savedBoardState.getSquares()[i][j];
+			}
+		}
+	}
+	
+	private void resetGrid() {
+		int i = 0;
+		int j = 0;
+		for (Node node : savedGridAspect.getChildren()) {
+			boardGrid.add(node, j, i);
+		}
+		if (j == ROW_AND_COL_DIMENSION) {
+			i++;
+			j = 0;
+		}
+	}
 
 	private void setBoardClickable() {
 		for (int i = 0; i < ROW_AND_COL_DIMENSION; i++) {
@@ -418,7 +433,7 @@ public class Main extends Application {
 	// private void darkenLetterInHand(Character currChar, ImageView newImg) {
 	// boolean foundChar = false;
 	// for (int i = 0; i < 7 && foundChar == false; i++) {
-	// Node currPosInHand = playerHand.getChildren().get(i);
+	// Node currPosInHand = playerHand.getChildren().getEntry(i);
 	// if ((you.getHand().getEntry(i) == currChar)) {
 	// currPosInHand.setEffect(new Lighting());
 	// foundChar = true;
@@ -435,7 +450,6 @@ public class Main extends Application {
 		}
 		return null;
 	}
-
 	
 	private String stepPrompt() {
 		String prompt = "";
@@ -451,7 +465,6 @@ public class Main extends Application {
 		return prompt;
 	}
 
-	
 	private boolean is2LSquare(int i, int j) {
 		return ((i == 3 && (j == 0 || j == 7 || j == 14)) || (i == 6 && (j == 2 || j == 6 || j == 8 || j == 12))
 				|| (i == 8 && (j == 2 || j == 6 || j == 8 || j == 12)) || (i == 11 && (j == 0 || j == 7 || j == 14))
@@ -459,34 +472,29 @@ public class Main extends Application {
 				|| (j == 8 && (i == 2 || i == 12)) || (j == 11 && (i == 0 || i == 7 || i == 14)));
 	}
 
-	
 	private boolean is2WSquare(int i, int j) {
 		return (((i == j) || (14 - i == j)) && (i != 0 && i != 14) && (i <= 4 || i >= 10));
 	}
 
-	
 	private boolean is3LSquare(int i, int j) {
 		return ((i == 5 && (j == 1 || j == 5 || j == 9 || j == 13))
 				|| (i == 9 && (j == 1 || j == 5 || j == 9 || j == 13)) || (j == 5 && (i == 1 || i == 13))
 				|| (j == 9 && (i == 1 || i == 13)));
 	}
 	
-	
 	private boolean is3WSquare(int i, int j) {
 		return ((i == 0 && (j == 0 || j == 7 || j == 14)) || (i == 7 && (j == 0 || j == 14))
 				|| (i == 14 && (j == 0 || j == 7 || j == 14)));
 	}
 
-	
 	private void addSquareToBoard(int i, int j, String imgFile) {
 		board.getSquares()[i][j] = new Cell();
 		Cell currSquare = board.getSquares()[i][j];
 		currSquare.setImage(imgFile);
 		boardGrid.add(currSquare, j, i);
-		insertImage(boardGrid, i, j, currSquare.getImage(), true);
+		insertImageInGrid(boardGrid, i, j, currSquare.getImage());
 	}
 
-	
 	private void addLetterToHand(int i, String imgFile) {
 		yourHand[i] = new Cell();
 		Cell currLetterSlot = yourHand[i];
@@ -495,11 +503,20 @@ public class Main extends Application {
 			currLetterSlot.setImage("letter_" + you.getHand().getEntry(i) + ".png");
 		else
 			currLetterSlot.setImage("letter_blank.png");
-		playerHand.add(currLetterSlot, i, 0);
-		insertImage(playerHand, 0, i, currLetterSlot.getImage(), false);
+		//playerHand.getItems().add(i, currLetterSlot.getLetter()); TODO
+		insertImageInList(playerHand, 0, i, currLetterSlot.getImage());
 	}
 
-	
+	private void insertImageInList(ListView list, int row, int col, String img) {
+		ImageView newImg = new ImageView(img);
+		
+		newImg.setFitWidth(45);
+		newImg.setFitHeight(45);
+		//playerHand.setGridLinesVisible(false);
+		playerHand.getItems().add(col, newImg); //TODO
+		//playerHand.set(true);
+	}
+
 	private void addLetterToBoard(int i, int j, String imgFile) {
 		String squareType = relevantSquareType(i, j);
 		if (squareType.equals(""))
@@ -510,13 +527,12 @@ public class Main extends Application {
 		Cell currSquare = board.getSquares()[i][j];
 		currSquare.setImage(imgFile);
 		boardGrid.add(currSquare, j, i);
-		insertImage(boardGrid, i, j, currSquare.getImage(), true);
+		insertImageInGrid(boardGrid, i, j, currSquare.getImage());
 	}
 
-	private void insertImage(GridPane grid, int row, int col, String img, boolean boardFormat) {
+	private void insertImageInGrid(GridPane grid, int row, int col, String img) {
 		ImageView newImg = new ImageView(new Image(img));
-
-		if (boardFormat) {
+		
 			// if (!newImg.getId().contains("letter_")) {
 			newImg.setOnMouseEntered(e -> {if (step == 3) newImg.setEffect(new Glow(0.8));});
 			newImg.setOnMouseExited(e -> {if (step == 3) newImg.setEffect(new Glow(0));});
@@ -526,49 +542,57 @@ public class Main extends Application {
 			grid.setGridLinesVisible(false);
 			grid.add(newImg, col, row);
 			grid.setGridLinesVisible(true);
-		} else if (!boardFormat) {
-			newImg.setFitWidth(60);
-			newImg.setFitHeight(60);
-			grid.setGridLinesVisible(false);
-			grid.add(newImg, col, row);
-			grid.setGridLinesVisible(true);
-		}
 
 		newImg.setOnMouseClicked(e -> {
 			if (step == 3 && (userWordIndex < you.getWord().length())) {
 				letterRow = row;
 				letterCol = col;
 				// keep in mind: playerHasLetterInHand() is a boolean method that modifies stuff!
-				if ((squareClickedContainsLetter() || playerHasLetterInHand())
-						&& (userWordIndex == 0 || perClickRestrictionsFollowed())
+				if ((userWordIndex == 0 || perClickRestrictionsFollowed())
 						&& (userClickedOnNewSquarePosition())) {
-					Cell currSquare = board.getSquares()[letterRow][letterCol];
-					Character currChar = you.getWord().charAt(userWordIndex++);
-					currSquare.setOccupyingLetter(currChar);
-					String image = currSquare.getImage();
-					addLetterToBoard(letterRow, letterCol, image);
-					darkenLetterInHand(currChar, newImg);
-					// condition: only add to player positions if clicked square was not already
-					// occupied with a letter
-					you.addToPlayerPositions(new Position(letterRow, letterCol));
-					// only place letter on board if square clicked does not contain letter
-					// placed during this turn
-				} else if (playerHasJokerInHand()
-						&& (userWordIndex == 0 || perClickRestrictionsFollowed())
-						&& (userClickedOnNewSquarePosition())) {
-					Cell currSquare = board.getSquares()[letterRow][letterCol];
-					Character currChar = you.getWord().charAt(userWordIndex++);
-					currSquare.setOccupyingLetter(' ');
-					String image = "letter_blank.png";
-					addLetterToBoard(letterRow, letterCol, image);
-					darkenLetterInHand(currChar, newImg);
-					// condition: only add to player positions if clicked square was not already
-					// occupied with a letter
-					// EDIT: last player position needs to be added even if letter already on
-					// board was clicked, to make following clicks possible (only difference:
-					// points)
-					you.addToPlayerPositions(new Position(letterRow, letterCol));
-					you.addToJokerCount(-1);
+					if (squareClickedContainsLetter()) {
+						// checks whether the clicked tile matches the current letter trying to
+						// be placed on the board
+						Character currWordChar = you.getWord().charAt(userWordIndex);
+						Character currBoardChar = board.getSquares()[letterRow][letterCol].getLetter();
+						if (currWordChar == currBoardChar) {
+							you.addToPlayerPositions(new Position(letterRow, letterCol));
+							System.out.println(board.getSquares()[letterRow][letterCol].toString());
+							userWordIndex++;
+						}
+						System.out.println(currBoardChar);
+					}
+					else if (playerHasLetterInHand()) {
+						Cell currSquare = board.getSquares()[letterRow][letterCol];
+						Character currWordChar = you.getWord().charAt(userWordIndex++);
+						currSquare.setOccupyingLetter(currWordChar);
+						String image = currSquare.getImage();
+						addLetterToBoard(letterRow, letterCol, image);
+						// darkenLetterInHand(currChar, newImg);
+						// condition: only add to player positions if clicked square was not already
+						// occupied with a letter
+						you.addToLetterPlacements(new Position(letterRow, letterCol));
+						you.addToPlayerPositions(new Position(letterRow, letterCol));
+						// only place letter on board if square clicked does not contain letter
+						// placed during this turn
+						System.out.println(board.getSquares()[letterRow][letterCol].toString());
+					} else if (playerHasJokerInHand()) {
+						Cell currSquare = board.getSquares()[letterRow][letterCol];
+						Character currWordChar = you.getWord().charAt(userWordIndex++);
+						currSquare.setOccupyingLetter(' ');
+						String image = "letter_blank.png";
+						addLetterToBoard(letterRow, letterCol, image);
+						// darkenLetterInHand(currChar, newImg);
+						// condition: only add to player positions if clicked square was not already
+						// occupied with a letter
+						// EDIT: last player position needs to be added even if letter already on
+						// board was clicked, to make following clicks possible (only difference:
+						// points)
+						you.addToLetterPlacements(new Position(letterRow, letterCol));
+						you.addToPlayerPositions(new Position(letterRow, letterCol));
+						you.addToJokerCount(-1);
+						jokerUseDeterminer.add(currWordChar);
+					}
 				}
 			}
 			
@@ -579,7 +603,6 @@ public class Main extends Application {
 					instructionDisplay.setText(stepPrompt());
 				}
 			}
-			System.out.println(board.getSquares()[letterRow][letterCol].toString());
 		});
 	}
 
@@ -602,7 +625,7 @@ public class Main extends Application {
 
 	private void darkenLetterInHand(Character currChar, ImageView newImg) {
 		int i = 0;
-		for (Node child : playerHand.getChildren()) {
+		for (Node child : handCharacters.getChildren()) {
 		    Integer r = GridPane.getRowIndex(child);
 		    Integer c = GridPane.getColumnIndex(child);
 		    int row = (r == null ? 0 : r);
@@ -621,12 +644,11 @@ public class Main extends Application {
 	
 	private boolean squareClickedContainsLetter() {
 		if (firstTurn)
-			return false;
-		
-		String currPosString = "(" + letterRow + ", " + letterCol + ")";
+			return false;	
+		Position currPos = new Position(letterRow, letterCol);
 		
 		for (int i = 0; i < enforcedPositions.getLength(); i++) {
-			if (enforcedPositions.getEntry(i).toString().equals(currPosString))
+			if (enforcedPositions.getEntry(i).toString().equals(currPos.toString()))
 				return true;
 		}
 		return false;
@@ -641,7 +663,7 @@ public class Main extends Application {
 		
 		if (userWordIndex == 0 || perClickRestrictionsFollowed()) {
 			
-			for (int i = subarrayFirstIndex; i < 7; i++) {
+			for (int i = subarrayFirstIndex; i < you.getHand().getLength(); i++) {
 				Character currLetter = you.getHand().getEntry(i);
 				if (currLetter == currWordChar) {
 					placedLettersTracker.add(currLetter, i);
@@ -708,7 +730,7 @@ public class Main extends Application {
 	}
 
 	private void addMultipleLettersToHand() {
-		int lastIndex = you.getHand().getLength() - 1;
+		int lastIndex = you.getHand().getLength();
 		while (you.getHand().getLength() < you.getFinalHandSize()) {
 			Character newLetter = letterBag.fetchOneLetter();
 			you.getHand().add(newLetter);
@@ -722,8 +744,18 @@ public class Main extends Application {
 			for (int j = you.getHand().getLength() - 1; j >= 0; j--) {
 				Character currWordChar = you.getWord().charAt(i);
 				Character currHandChar = you.getHand().getEntry(j);
-				if (currWordChar == currHandChar) {
+				//int occurrencesOfThisLetterInWord = placedLettersTracker.getValue(currWordChar);
+				if (currWordChar == currHandChar 
+						/*&& occurrencesOfThisLetterInWord > 0*/) {
 					you.getHand().remove(j);
+					playerHand.getItems().remove(j);
+					break;
+					//placedLettersTracker.add(currWordChar, occurrencesOfThisLetterInWord - 1);
+				} else if (currHandChar == ' ' && jokerUseDeterminer.contains(currWordChar)) {
+					you.getHand().remove(j);
+					playerHand.getItems().remove(j);
+					jokerUseDeterminer.remove(currWordChar);
+					break;
 				}
 				// OR
 				//addLetterToHand(j, "" + letterBag.fetchOneLetter());
@@ -738,7 +770,7 @@ public class Main extends Application {
 
 	private void refreshEnforcedPositions() {
 		for (int i = 0; i < you.getPlayerPositions().getLength(); i++) {
-			enforcedPositions.add(you.getPlayerPositions().remove(0));
+			enforcedPositions.add(you.getLetterPlacements().remove(0));
 		}
 	}
 
@@ -749,31 +781,10 @@ public class Main extends Application {
 			if (step == 2) {
 				if (dictionary.containsWord(you.getWord())) {
 					step = 3;
-					// userInput.clear();
 					userInput.setDisable(true);
 					okBtn.setDisable(true);
-					int val = Player.getValOfWord(you.getWord()); 
 					//System.out.println(val);
 					// setBoardClickable();
-					
-					// for (int i = 0; i < ROW_AND_COL_DIMENSION; i++) {
-					// for (int j = 0; j < ROW_AND_COL_DIMENSION; j++) {
-					// letterRow = i;
-					// letterCol = j;
-					// //Cell currSquare = board.getSquares()[letterRow][letterCol];
-					// board.getSquares()[letterRow][letterCol].setOnMouseClicked(event -> {
-					// System.exit(0);
-					// char currChar = you.getWord().charAt(userWordIndex);
-					// board.getSquares()[letterRow][letterCol].setOccupyingLetter(currChar);
-					// userWordIndex++;
-					// String img = "letter_J.png";
-					// //currSquare.setImage(img);
-					// addLetterToBoard(letterRow,letterCol, img);
-					// darkenLetterInHand(currChar);
-					// });
-					// }
-					// }
-					
 					instructionDisplay.setText(stepPrompt());
 				} else {
 					instructionDisplay.setText(INVALID_WORD_PROMPT);
@@ -782,11 +793,22 @@ public class Main extends Application {
 				// confirm the word
 				// give points to player
 				you.setActualJokerCount(you.getJokerCount());
+				System.out.println("Before removing (actual hand): " + printHandContent());
+				System.out.println("Before removing (displayed hand): " + printDisplayedHandContent());
 				removeLettersFromHand();
+				System.out.println("After removing (actual hand):  " + printHandContent());
+				System.out.println("After removing (displayed hand):  " + printDisplayedHandContent());
 				addMultipleLettersToHand();
+				System.out.println("After adding (actual hand):    " + printHandContent());
+				System.out.println("After adding (displayed hand):    " + printHandContent());
 				makeJokersTakeLetterValue();
+				refreshLetterValueOfSquares();
 				refreshEnforcedPositions(); // somewhat refreshes board state
+				you.getPlayerPositions().clear();
+				you.getLetterPlacements().clear();
 				step = 1;
+				userWordIndex = 0;
+				firstTurn = false;
 				playTurnBtn.setVisible(true);
 				exchange1Btn.setVisible(true);
 				exchangeAllBtn.setVisible(true);
@@ -796,8 +818,38 @@ public class Main extends Application {
 				okBtn.setDisable(true);
 				cancelBtn.setDisable(true);
 				instructionDisplay.setText(stepPrompt());
+				// test
+				printHandContent();
 			}
 		});
+	}
+	
+	private void refreshLetterValueOfSquares() {
+		for (int i = 0; i < you.getPlayerPositions().getLength(); i++) {
+			int currPosRow = you.getPlayerPositions().getEntry(i).getRow();
+			int currPosCol = you.getPlayerPositions().getEntry(i).getCol();
+			String currSquareImage = board.getSquares()[currPosRow][currPosCol].getImage();
+			if (!currSquareImage.equals("letter_blank.png")) {
+				Character currSquareLetter = currSquareImage.charAt(7);
+				board.getSquares()[currPosRow][currPosCol].setOccupyingLetter(currSquareLetter);
+			}
+		}
+	}
+
+	private String printDisplayedHandContent() {
+		String fullString = "";
+		for (int i = 0; i < yourHand.length; i++) {
+			fullString += yourHand[i].getLetter() + " ";
+		}
+		return fullString;
+	}
+
+	private String printHandContent() {
+		String fullString = "";
+		for (int i = 0; i < you.getHand().getLength(); i++) {
+			fullString += you.getHand().getEntry(i) + " ";
+		}
+		return fullString;
 	}
 	
 	private void setupCancelBtnActions() {
@@ -820,8 +872,9 @@ public class Main extends Application {
 				instructionDisplay.setText(stepPrompt());
 				userWordIndex = 0;
 				placedLettersTracker.clear();
+				you.getPlayerPositions().clear();
 				you.setJokerCount(you.getActualJokerCount());
-				clearNewlyOccupiedSquares();
+				clearNewlyOccupiedSquares(); // ! clears letterPlacements field in Player
 //				resetBoard();
 //				resetGrid();
 			} else if (step == 4) {
@@ -829,70 +882,14 @@ public class Main extends Application {
 				instructionDisplay.setText(stepPrompt());
 				userWordIndex = 0;
 				placedLettersTracker.clear();
+				you.getPlayerPositions().clear();
 				you.setJokerCount(you.getActualJokerCount());
-				clearNewlyOccupiedSquares();
+				clearNewlyOccupiedSquares(); // ! clears letterPlacements field in Player
 				okBtn.setDisable(true);
 			}
 		});
 	}
-	
-	
-	/*for(int i= 0; i<= 6; i++) {
-		char playerLetters = LetterBag.shuffledArray[i]; 
-		System.out.println(playerLetters);
-		PlayerLetters[i] = playerLetters; 
-	}
-	//Letters in players hand
-	//Letter1
-	int i1 = 0; 
-	ImageView letter1 = new ImageView(LetterBag.getBag(PlayerLetters[i1]));
-	letter1.setFitHeight(40);
-	letter1.setFitWidth(40); 
-	playerHand.add(letter1, 0, 0);
-	GridPane.setMargin(letter1, LETTER_INSETS);
-	//Letter2
-	int i2 = 1; 
-	ImageView letter2 = new ImageView(LetterBag.getBag(PlayerLetters[i2]));
-	letter2.setFitHeight(40);
-	letter2.setFitWidth(40); 
-	playerHand.add(letter2, 1, 0);
-	GridPane.setMargin(letter2, LETTER_INSETS);
-	//Letter3
-	int i3 = 2; 
-	ImageView letter3 = new ImageView(LetterBag.getBag(PlayerLetters[i3]));
-	letter3.setFitHeight(40);
-	letter3.setFitWidth(40); 
-	playerHand.add(letter3, 2, 0);
-	GridPane.setMargin(letter1, LETTER_INSETS);
-	//Letter4
-	int i4 = 3; 
-	ImageView letter4 = new ImageView(LetterBag.getBag(PlayerLetters[i4]));
-	letter4.setFitHeight(40);
-	letter4.setFitWidth(40); 
-	playerHand.add(letter4, 3, 0);
-	GridPane.setMargin(letter4, LETTER_INSETS);
-	//Letter5
-	int i5 = 4; 
-	ImageView letter5 = new ImageView(LetterBag.getBag(PlayerLetters[i5]));
-	letter5.setFitHeight(40);
-	letter5.setFitWidth(40); 
-	playerHand.add(letter5, 4, 0);
-	GridPane.setMargin(letter5, LETTER_INSETS);
-	//Letter6
-	int i6 = 5; 
-	ImageView letter6 = new ImageView(LetterBag.getBag(PlayerLetters[i6]));
-	letter6.setFitHeight(40);
-	letter6.setFitWidth(40); 
-	playerHand.add(letter6, 5, 0);
-	GridPane.setMargin(letter6, LETTER_INSETS);
-	//Letter7
-	int i7 = 6; 
-	ImageView letter7 = new ImageView(LetterBag.getBag(PlayerLetters[i7]));
-	letter7.setFitHeight(40);
-	letter7.setFitWidth(40); 
-	playerHand.add(letter7, 6, 0);
-	GridPane.setMargin(letter7, LETTER_INSETS);
-	}*/
+
 	
 	public static void main(String[] args) {
 		launch(args);

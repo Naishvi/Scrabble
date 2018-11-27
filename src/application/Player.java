@@ -1,3 +1,4 @@
+
 package application;
 
 import java.util.ArrayList;
@@ -9,18 +10,22 @@ import java.util.Scanner;
 
 public class Player extends LetterBag {
 
-	private static String currWord;
+	private String currWord;
 	private LinkedList<Character> hand;
 	private static final int MAX_HAND_SIZE = 7;
-	private LinkedList<Position> currPlacement;
+	private LinkedList<Position> letterPlacements; // only keeps track of squares where player
+												   // placed a letter
+	private LinkedList<Position> validClicksSequence; // keeps track of all squares clicked
+													  // to determine placement validity
 	private int jokerCount; // refreshed at every action, even cancellable ones
 	private int originalJokerCount; // actual number of jokers before/after turn
-	static LetterBag letterValue = new LetterBag(); 
+	
 	public Player(LetterBag letters) {
 		String currWord = "";
 		hand = new LinkedList<>();
 		addLettersToHand(letters);
-		currPlacement = new LinkedList<>();
+		letterPlacements = new LinkedList<>();
+		validClicksSequence = new LinkedList<>();
 	}
 
 	public void addLettersToHand(LetterBag letterBag) {
@@ -79,49 +84,33 @@ public class Player extends LetterBag {
 	}
 	
 	public void addToPlayerPositions(Position pos) {
-		currPlacement.add(pos);
+		validClicksSequence.add(pos);
 	}
 	
 	public LinkedList<Position> getPlayerPositions() {
-		return currPlacement;
+		return validClicksSequence;
 	}
 	
-	private static boolean wordIsInDictionary(Scanner dictionary) {
-		while (dictionary.hasNextLine()) {
-			if (dictionary.nextLine().equalsIgnoreCase(currWord)) {
-				return true;
-			}
-		}
-		return false;
+	public void addToLetterPlacements(Position pos) {
+		letterPlacements.add(pos);
 	}
-
-
+	
+	public LinkedList<Position> getLetterPlacements() {
+		return letterPlacements;
+	}
+	
+/*
 	public static int getValOfWord(String word) {
-
 		int wordPoints = 0;
 		char[] letterArray = word.toCharArray();
 		for (int i = 0; i < letterArray.length; i++) {
 			wordPoints += letterValue.getValueOf(letterArray[i]);
 		}
-		System.out.println(wordPoints);
 		return wordPoints;
-
-	}
+	}*/
 	
 	
+	
 
-	public static void main(String[] args) {
-		String playerWord = "MATH";
-		String fName = "Dictionary.txt";
-
-		try (Scanner dictionaryFile = new Scanner(new File(fName))) {
-			boolean wordFound = wordIsInDictionary(dictionaryFile);
-			System.out.println("Word was found: " + wordFound);
-		} catch (FileNotFoundException e) {
-			System.err.println("Cannot open file " + fName + ". Exiting.");
-			System.exit(0);
-		}
-		System.out.println(getValOfWord(playerWord));
-	}
 
 }
