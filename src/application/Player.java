@@ -5,12 +5,19 @@ package application;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.Scanner;
 
-public class Player extends LetterBag {
+public class Player extends Thread {
 
+	private int score;
+	private int id;
 	private String currWord;
 	private LinkedList<Character> hand;
 	private static final int MAX_HAND_SIZE = 7;
@@ -20,13 +27,61 @@ public class Player extends LetterBag {
 													  // to determine placement validity
 	private int jokerCount; // refreshed at every action, even cancellable ones
 	private int originalJokerCount; // actual number of jokers before/after turn
+	private Player opponent;
 	
-	public Player(LetterBag letters) {
-		String currWord = "";
+	Socket socket;
+	BufferedReader input;
+	PrintWriter output;
+	
+	public Player(Socket newSocket, int givenId, LetterBag letters) {
+		score = 0;
+		socket = newSocket;
+		id = givenId;
+		currWord = "";
 		hand = new LinkedList<>();
 		addLettersToHand(letters);
 		letterPlacements = new LinkedList<>();
 		validClicksSequence = new LinkedList<>();
+		opponent = null;
+		
+		try {
+			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			output = new PrintWriter(socket.getOutputStream(), true);
+			output.println("You are Player " + id);
+			output.println("Waiting for opponent to connect...");
+		} catch (IOException e) {
+			System.out.println("Player died: " + e);
+		}
+	}
+	
+	public void run() {
+		try {
+			output.println("All players connected");
+			
+			if (id == 1) {
+				output.println("Your move");
+			}
+			
+			while (true) {
+				String encode = 
+			}
+		} finally {
+			try {
+				socket.close();
+			} catch (IOException e) {}
+		}
+	}
+	
+	public int getScore() {
+		return score;
+	}
+	
+	public void addToScore(int value) {
+		score += value;
+	}
+	
+	public void setScore(int value) {
+		score = value;
 	}
 
 	public void addLettersToHand(LetterBag letterBag) {
@@ -98,6 +153,14 @@ public class Player extends LetterBag {
 	
 	public LinkedList<Position> getLetterPlacements() {
 		return letterPlacements;
+	}
+	
+	public Player getOpponent() {
+		return opponent;
+	}
+	
+	public void setOpponent(Player opp) {
+		opponent = opp;
 	}
 	
 	private boolean wordIsInDictionary(Scanner dictionary) {
