@@ -76,14 +76,27 @@ public class Server {
 
              dos2.writeUTF(player2Name + ", you can begin to play. Enjoy your Scrabble game!");
              
-             while(true) {
-             String encodedString = dis1.readUTF(); 
-             System.out.println(encodedString);
-             dos2.writeUTF(encodedString);
-             String encodedString2 = dis2.readUTF(); 
-             dos1.writeUTF(encodedString2);
+            
+             Socket socket3 = serverSocket.accept();
+
+             DataOutputStream player1Out = new DataOutputStream(socket1.getOutputStream());
+
+             DataInputStream player1In = new DataInputStream(socket1.getInputStream());
              
-             }
+             Socket socket4 = serverSocket.accept();
+
+             DataOutputStream player2Out = new DataOutputStream(socket1.getOutputStream());
+
+             DataInputStream player2In = new DataInputStream(socket1.getInputStream());
+             
+        
+             String encodedString = player1In.readUTF(); 
+             System.out.println(encodedString);
+             player2Out .writeUTF(encodedString);
+             String encodedString2 = player2In.readUTF(); 
+             player1Out.writeUTF(encodedString2);
+             
+             
              
              
             // dos1.writeBoolean(true);

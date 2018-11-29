@@ -48,10 +48,10 @@ public class Client extends Main{
 	public LinkedList<Integer> getColList() {
 		return colList;
 	}
-	
+
 
 	public static void main(String[] args) throws IOException{
-
+		int x = 5; 
 		Socket socket = new Socket("localhost", 3246);
 		InputStream inputStream = socket.getInputStream();
 		OutputStream outStream = socket.getOutputStream(); 
@@ -84,14 +84,14 @@ public class Client extends Main{
 		System.out.println(tmpReader);
 		launch(args);
 		
-		while(true) {
 			DataOutputStream outgoing = new DataOutputStream(socket.getOutputStream());
 			DataInputStream incoming = new DataInputStream(socket.getInputStream());
-			String send = encode(); 
-			dos.writeUTF(send);
+			String send = encode();
+			System.out.println(send); 
+			outgoing.writeUTF(send);
 
 
-			word = tmpReader; 	
+			word = incoming.readUTF(); 	
 			System.out.println(word);
 			try {
 				Thread.sleep(50);
@@ -99,6 +99,7 @@ public class Client extends Main{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+	
 			
 			
 	
@@ -107,8 +108,7 @@ public class Client extends Main{
 			
 		}
 	
-}
-		
+	
 		
 		/*while(Quit != true) {
 			// 
