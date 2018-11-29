@@ -1,18 +1,31 @@
 package application;
 
+import java.applet.Applet;
+import java.awt.Container;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
+import java.util.Scanner;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.geometry.HPos;
+import javafx.embed.swing.JFXPanel;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.NodeOrientation;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -21,25 +34,27 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.effect.Glow;
-import javafx.scene.effect.Lighting;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class Client1 extends Application implements Runnable {
+
+	final JFXPanel fxPanel = new JFXPanel();
+
+	public static Scanner scanner = new Scanner(System.in);
 
 	private static final Font UNIVERSAL_FONT = Font.font("Berlin Sans FB", 16);
 	private static final Font UNIVERSAL_FONT_BOLD = Font.font("Berlin Sans FB", FontWeight.BOLD, 14);
 	private static final Insets LETTER_INSETS = new Insets(2, 2, 2, 2);
 	private static final Insets OPTION_BUTTON_INSETS = new Insets(5, 5, 5, 5);
 	private static final String BACKGROUND_COLOR = "-fx-background-color: #ffffff";
-	
+
 	private static final String FIRST_PROMPT = "Choose your action";
 	private static final String PLAY_PROMPT = "Type your word. If you want to use letters "
 			+ "already on the board as part of your word, just have them included in the word "
@@ -57,18 +72,19 @@ public class Main extends Application {
 	private static final String OPPONENT_ACTION_NOTIF_2 = "Oppoent exchanged one of their tiles";
 	private static final String OPPONENT_ACTION_NOTIF_3 = "Opponent exchanged all their tiles";
 	private static final String OPPONENT_ACTION_NOTIF_4 = "Opponent skipped their turn";
-	
+
 	private static final int MINIMUM_WORD_LENGTH = 2;
 	private static final int ROW_AND_COL_DIMENSION = 15;
 
-
 	// GAME COMPONENTS
 
-	Board board;
+	Stage primaryStage;
+	HBox windowHBox;
+	static Board board;
 	GridPane boardGrid;
 	LetterBag letterBag;
 	Dictionary dictionary;
-	LinkedList<Position> enforcedPositions;
+	static LinkedList<Position> enforcedPositions;
 	TextField userInput;
 	Button okBtn;
 	Button cancelBtn;
@@ -79,12 +95,28 @@ public class Main extends Application {
 	Button skipTurnBtn;
 	ArrayDictionary<Character, Integer> placedLettersTracker;
 	LinkedList<Character> jokerUseDeterminer;
-	public static boolean quit = false;
-	Socket socket = new Socket();
-	
+
+	// public boolean encodeMessageReceived = false;
+
+	public static LinkedList<Character> letterList = new LinkedList<>();
+	public static LinkedList<Integer> rowList = new LinkedList<>();
+	public static LinkedList<Integer> colList = new LinkedList<>();
+
+	public LinkedList<Character> getLetterList() {
+		return letterList;
+	}
+
+	public LinkedList<Integer> getRowList() {
+		return rowList;
+	}
+
+	public LinkedList<Integer> getColList() {
+		return colList;
+	}
+
 	Player you;
 	Cell[] yourHand;
-	
+
 	ObservableList handCharacters;
 	ListView playerHand;
 	Player opponent;
@@ -96,10 +128,21 @@ public class Main extends Application {
 	int letterCol;
 	int lengthCounter;
 
-	//// START ////
+	private static Socket socket;
+	private static DataInputStream dis;
+	private static DataOutputStream dos;
+	private BufferedReader in;
+	private PrintWriter out;
 
-	@Override
-	public void start(Stage primaryStage) {
+	public Client1(String servAddress) throws Exception {
+		Platform.setImplicitExit(false);
+
+		// Networking
+		socket = new Socket(servAddress, 5231); // TODO
+		dos = new DataOutputStream(socket.getOutputStream());
+		dis = new DataInputStream(socket.getInputStream());
+		// in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		// out = new PrintWriter(socket.getOutputStream(), true);
 
 		board = new Board();
 		letterBag = new LetterBag();
@@ -117,32 +160,33 @@ public class Main extends Application {
 		userWordIndex = 0;
 		lengthCounter = 0;
 
+		// GUI
 		Group root = new Group();
 
-		HBox windowHBox = new HBox();
-			VBox leftVBox = new VBox();
-				boardGrid = new GridPane();
-				HBox tfOkCancel = new HBox();
-					userInput = new TextField();
-					okBtn = new Button("OK");
-					cancelBtn = new Button("Cancel");
-				tfOkCancel.getChildren().addAll(userInput, okBtn, cancelBtn); // adding
-				playerHand = new ListView<>();
-			leftVBox.getChildren().addAll(boardGrid, tfOkCancel, playerHand); // adding
-			VBox rightVBox = new VBox();
-				GridPane scorePanel = new GridPane();
-				instructionDisplay = new TextArea();
-				GridPane optionBtns = new GridPane();
-					playTurnBtn = new Button("Play");
-					exchange1Btn = new Button("Exchange 1");
-					exchangeAllBtn = new Button("Exchange all");
-					skipTurnBtn = new Button("Skip");
-				Button quitBtn = new Button("Quit");
-				optionBtns.add(playTurnBtn, 0, 0);
-				optionBtns.add(exchange1Btn, 1, 0);
-				optionBtns.add(exchangeAllBtn, 0, 1);
-				optionBtns.add(skipTurnBtn, 1, 1);
-			rightVBox.getChildren().addAll(scorePanel, instructionDisplay, optionBtns, quitBtn); // adding
+		windowHBox = new HBox();
+		VBox leftVBox = new VBox();
+		boardGrid = new GridPane();
+		HBox tfOkCancel = new HBox();
+		userInput = new TextField();
+		okBtn = new Button("OK");
+		cancelBtn = new Button("Cancel");
+		tfOkCancel.getChildren().addAll(userInput, okBtn, cancelBtn); // adding
+		playerHand = new ListView<>();
+		leftVBox.getChildren().addAll(boardGrid, tfOkCancel, playerHand); // adding
+		VBox rightVBox = new VBox();
+		GridPane scorePanel = new GridPane();
+		instructionDisplay = new TextArea();
+		GridPane optionBtns = new GridPane();
+		playTurnBtn = new Button("Play");
+		exchange1Btn = new Button("Exchange 1");
+		exchangeAllBtn = new Button("Exchange all");
+		skipTurnBtn = new Button("Skip");
+		Button quitBtn = new Button("Quit");
+		optionBtns.add(playTurnBtn, 0, 0);
+		optionBtns.add(exchange1Btn, 1, 0);
+		optionBtns.add(exchangeAllBtn, 0, 1);
+		optionBtns.add(skipTurnBtn, 1, 1);
+		rightVBox.getChildren().addAll(scorePanel, instructionDisplay, optionBtns, quitBtn); // adding
 		windowHBox.getChildren().addAll(leftVBox, rightVBox); // adding
 
 		//// LEFT VBOX ////
@@ -176,9 +220,8 @@ public class Main extends Application {
 		boardGrid.setGridLinesVisible(true);
 
 		addSquareToBoard(7, 7, "middle_square.png");
-		enforcedPositions.add(new Position(7,7));
-		
-		
+		enforcedPositions.add(new Position(7, 7));
+
 		// INPUT FIELD
 		userInput.setPromptText("Type your word here");
 		userInput.setPrefColumnCount(10);
@@ -209,9 +252,9 @@ public class Main extends Application {
 
 		// PLAYER HAND
 		playerHand.setOrientation(Orientation.HORIZONTAL);
-		//playerHand.getItems().get(0);
-//		playerHand.setPrefHeight(60);
-//		playerHand.setPrefWidth(420);
+		// playerHand.getItems().get(0);
+		// playerHand.setPrefHeight(60);
+		// playerHand.setPrefWidth(420);
 		VBox.setMargin(playerHand, new Insets(10, 20, 10, 20));
 		for (int i = 0; i < you.getFinalHandSize(); i++) {
 			String imgFile = "letter_" + you.getHand().getEntry(i) + ".png";
@@ -264,7 +307,6 @@ public class Main extends Application {
 
 		//// ACTIONS ////
 
-		
 		playTurnBtn.setOnMouseEntered(e -> {
 			instructionDisplay.setText("Play turn");
 		});
@@ -282,7 +324,7 @@ public class Main extends Application {
 			// okBtn.setDisable(false);
 			cancelBtn.setDisable(false);
 		});
-		
+
 		exchange1Btn.setOnMouseEntered(e -> {
 			instructionDisplay.setText("Exchange one tile");
 		});
@@ -295,7 +337,7 @@ public class Main extends Application {
 			cancelBtn.setDisable(false);
 			instructionDisplay.setText(stepPrompt());
 			okBtn.setDisable(false);
-			
+
 		});
 
 		exchangeAllBtn.setOnMouseEntered(e -> {
@@ -322,26 +364,109 @@ public class Main extends Application {
 			setOptionButtonsVisible(false);
 		});
 
-		setupOKBtnActions();
+		setupOKBtnActions(dis, dos);
 		setupCancelBtnActions();
-		
-		quitBtn.setOnAction(e -> {quit = true; System.exit(0);});
+
+		quitBtn.setOnAction(e -> {
+			// quit = true;
+			System.exit(0);
+		});
 
 		windowHBox.setStyle(BACKGROUND_COLOR);
-		Scene myScene = new Scene(windowHBox, 800, 600);
 
-		primaryStage.setScene(myScene);
-		primaryStage.setResizable(false);
-		primaryStage.setTitle("Scrabble Game");
-		primaryStage.show();
+		if (you.getId() == 2) {
+			enterSpectatingMode(dis, dos);
+		}
 	}
 
+	public static void main(String[] args) throws Exception {
+		// Client1 c = new Client1("localhost");
+		Socket socket = new Socket("localhost", 5231);
+		DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+		DataInputStream dis = new DataInputStream(socket.getInputStream());
 
-	
-	
+		System.out.println("Hello user. Enter your name: ");
+		String name = scanner.nextLine();
+		dos.writeUTF(name);
 
-	//// UTILITIES ////
+		String serverMessage = dis.readUTF();
+		System.out.println(serverMessage);
 
+		String tmpReader = dis.readUTF();
+		System.out.println(tmpReader);
+		// launch(args);
+		// boolean tmpReader2 = dis.readBoolean();
+		try {
+			System.out.print("Creating server address...");
+			String serverAddress = (args.length == 0) ? "localhost" : args[1];
+			System.out.println("Done");
+			System.out.print("Initializing client...");
+			Client1 client = new Client1("localhost");
+			System.out.println("Done");
+			System.out.print("Creating scene...");
+			Scene myScene = new Scene(client.windowHBox, 800, 600);
+			System.out.println("Done");
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					System.out.print("Creating stage...");
+					client.primaryStage = new Stage();
+					System.out.println("Done");
+					System.out.print("Laying out scene on stage...");
+					client.primaryStage.setScene(myScene);
+					System.out.println("Done");
+					System.out.print("Setting window restrictions...");
+					client.primaryStage.setResizable(false);
+					System.out.println("Done");
+					System.out.print("Setting window title...");
+					client.primaryStage.setTitle("Scrabble Game - " + name);
+					System.out.println("Done");
+					client.primaryStage.show();
+					System.out.println("Starting Scrabble application...");
+				}
+			});
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void start(Stage primaryStage) {
+
+	}
+
+	public static String encode() {
+		String encodeString = "";
+
+		// LinkedList of positions enforcedPositions (Main.java) always happens
+		// to have a duplicate entry at the beginning. It should be removed
+		enforcedPositions.remove(new Position(7, 7));
+		for (int i = 0; i < enforcedPositions.getLength(); i++) {
+			Position aPos = enforcedPositions.getEntry(i);
+			int posRow = aPos.getRow();
+			int posCol = aPos.getCol();
+			Character charAtPos = board.getSquares()[posRow][posCol].getLetter();
+			String toConcatenate = charAtPos + "," + posRow + "," + posCol;
+			encodeString += toConcatenate + (i < enforcedPositions.getLength() - 1 ? "|" : "");
+		}
+
+		return encodeString;
+	}
+
+	public static void decode(String word) {
+		String[] letters = word.split("\\|");
+		// [("T,4,2"), ("O,5,2"), ("E,6,2")]
+		for (int i = 0; i < letters.length; i++) {
+
+			String[] positionOfLetter = letters[i].split(",");
+			letterList.add(positionOfLetter[0].charAt(0));
+			rowList.add(Integer.parseInt(positionOfLetter[1]));
+			colList.add(Integer.parseInt(positionOfLetter[2]));
+			// System.out.println(linkedLetters.toString());
+
+		}
+	}
 
 	private void clearNewlyOccupiedSquares() {
 		while (!you.getLetterPlacements().isEmpty()) {
@@ -366,7 +491,7 @@ public class Main extends Application {
 		}
 		return "clear_square.png";
 	}
-	
+
 	private String relevantSquareType(int r, int c) {
 		if (is2LSquare(r, c)) {
 			return "2L";
@@ -412,8 +537,6 @@ public class Main extends Application {
 	// }
 	// }
 
-	
-	
 	private String stepPrompt() {
 		String prompt = "";
 		if (step == 1)
@@ -428,7 +551,7 @@ public class Main extends Application {
 			prompt = EXCHANGE_ONE_PROMPT;
 		if (step == 20)
 			prompt = EXCHANGE_ALL_PROMPT;
-		
+
 		return prompt;
 	}
 
@@ -448,7 +571,7 @@ public class Main extends Application {
 				|| (i == 9 && (j == 1 || j == 5 || j == 9 || j == 13)) || (j == 5 && (i == 1 || i == 13))
 				|| (j == 9 && (i == 1 || i == 13)));
 	}
-	
+
 	private boolean is3WSquare(int i, int j) {
 		return ((i == 0 && (j == 0 || j == 7 || j == 14)) || (i == 7 && (j == 0 || j == 14))
 				|| (i == 14 && (j == 0 || j == 7 || j == 14)));
@@ -468,7 +591,7 @@ public class Main extends Application {
 			board.getSquares()[i][j] = new Cell();
 		else
 			board.getSquares()[i][j] = new Cell(squareType);
-		
+
 		Cell currSquare = board.getSquares()[i][j];
 		currSquare.setImage(imgFile);
 		boardGrid.add(currSquare, j, i);
@@ -485,7 +608,7 @@ public class Main extends Application {
 			currLetterSlot.setImage("letter_blank.png");
 			you.addToActualJokerCount(1);
 		}
-		//playerHand.getItems().add(i, currLetterSlot.getLetter()); TODO
+		// playerHand.getItems().add(i, currLetterSlot.getLetter()); TODO
 		insertImageInList(playerHand, 0, i, currLetterSlot.getImage());
 	}
 
@@ -506,13 +629,14 @@ public class Main extends Application {
 			for (int j = you.getHand().getLength() - 1; j >= 0; j--) {
 				Character currWordChar = you.getWord().charAt(i);
 				Character currHandChar = you.getHand().getEntry(j);
-				//int occurrencesOfThisLetterInWord = placedLettersTracker.getValue(currWordChar);
-				if (currWordChar == currHandChar 
-						/*&& occurrencesOfThisLetterInWord > 0*/) {
+				// int occurrencesOfThisLetterInWord =
+				// placedLettersTracker.getValue(currWordChar);
+				if (currWordChar == currHandChar
+				/* && occurrencesOfThisLetterInWord > 0 */) {
 					you.getHand().remove(j);
 					playerHand.getItems().remove(j);
 					break;
-					//placedLettersTracker.add(currWordChar, occurrencesOfThisLetterInWord - 1);
+					// placedLettersTracker.add(currWordChar, occurrencesOfThisLetterInWord - 1);
 				} else if (currHandChar == ' ' && jokerUseDeterminer.contains(currWordChar)) {
 					you.getHand().remove(j);
 					playerHand.getItems().remove(j);
@@ -520,41 +644,47 @@ public class Main extends Application {
 					break;
 				}
 				// OR
-				//addLetterToHand(j, "" + letterBag.fetchOneLetter());
+				// addLetterToHand(j, "" + letterBag.fetchOneLetter());
 			}
 		}
 	}
 
 	private void insertImageInList(ListView list, int row, int col, String img) {
 		ImageView newImg = new ImageView(img);
-		
+
 		newImg.setFitWidth(45);
 		newImg.setFitHeight(45);
-		//playerHand.setGridLinesVisible(false);
-		playerHand.getItems().add(col, newImg); //TODO
-		//playerHand.set(true);
+		// playerHand.setGridLinesVisible(false);
+		playerHand.getItems().add(col, newImg); // TODO
+		// playerHand.set(true);
 	}
 
 	private void insertImageInGrid(GridPane grid, int row, int col, String img) {
 		ImageView newImg = new ImageView(new Image(img));
-		
-			// if (!newImg.getId().contains("letter_")) {
-			newImg.setOnMouseEntered(e -> {if (step == 3) newImg.setEffect(new Glow(0.8));});
-			newImg.setOnMouseExited(e -> {if (step == 3) newImg.setEffect(new Glow(0));});
-			// }
-			newImg.setFitWidth(30);
-			newImg.setFitHeight(30);
-			grid.setGridLinesVisible(false);
-			grid.add(newImg, col, row);
-			grid.setGridLinesVisible(true);
-	
+
+		// if (!newImg.getId().contains("letter_")) {
+		newImg.setOnMouseEntered(e -> {
+			if (step == 3)
+				newImg.setEffect(new Glow(0.8));
+		});
+		newImg.setOnMouseExited(e -> {
+			if (step == 3)
+				newImg.setEffect(new Glow(0));
+		});
+		// }
+		newImg.setFitWidth(30);
+		newImg.setFitHeight(30);
+		grid.setGridLinesVisible(false);
+		grid.add(newImg, col, row);
+		grid.setGridLinesVisible(true);
+
 		newImg.setOnMouseClicked(e -> {
 			if (step == 3 && (userWordIndex < you.getWord().length())) {
 				letterRow = row;
 				letterCol = col;
-				// keep in mind: playerHasLetterInHand() is a boolean method that modifies stuff!
-				if ((userWordIndex == 0 || perClickRestrictionsFollowed())
-						&& (userClickedOnNewSquarePosition())) {
+				// keep in mind: playerHasLetterInHand() is a boolean method that modifies
+				// stuff!
+				if ((userWordIndex == 0 || perClickRestrictionsFollowed()) && (userClickedOnNewSquarePosition())) {
 					if (squareClickedContainsLetter()) {
 						// checks whether the clicked tile matches the current letter trying to
 						// be placed on the board
@@ -565,8 +695,7 @@ public class Main extends Application {
 							userWordIndex++;
 						}
 						System.out.println("wudup1");
-					}
-					else if (playerHasLetterInHand()) {
+					} else if (playerHasLetterInHand()) {
 						Cell currSquare = board.getSquares()[letterRow][letterCol];
 						Character currWordChar = you.getWord().charAt(userWordIndex++);
 						currSquare.setOccupyingLetter(currWordChar);
@@ -616,20 +745,20 @@ public class Main extends Application {
 	private boolean userClickedOnNewSquarePosition() {
 		Position clickedPosition = new Position(letterRow, letterCol);
 		LinkedList<Position> alreadyClicked = you.getPlayerPositions();
-		
+
 		for (int i = 0; i < alreadyClicked.getLength(); i++) {
 			Position currPos = you.getPlayerPositions().getEntry(i);
 			if (currPos.toString().equals(clickedPosition.toString()))
 				return false;
 		}
-		
+
 		return true;
 	}
 
 	private boolean playerHasLetterInHand() {
 		Character currWordChar = you.getWord().charAt(userWordIndex);
 		Integer subarrayFirstIndex = 0;
-		
+
 		if (placedLettersTracker.contains(currWordChar))
 			subarrayFirstIndex = placedLettersTracker.getValue(currWordChar) + 1;
 
@@ -648,30 +777,30 @@ public class Main extends Application {
 		return you.getJokerCount() >= 1;
 	}
 
-	private void darkenLetterInHand(Character currChar, ImageView newImg) {
-		int i = 0;
-		for (Node child : handCharacters.getChildren()) {
-		    Integer r = GridPane.getRowIndex(child);
-		    Integer c = GridPane.getColumnIndex(child);
-		    int row = (r == null ? 0 : r);
-		    int column = (c == null ? 0 : c);
-		    if (row == 0 && column == i && (child instanceof Cell)) {
-		    	Cell currSquare = (Cell) child;
-		    	System.out.println(currSquare.getImage());
-		    	//currSquare.getImage().setEffect(new Lighting());
-		    	// playerHand.getChildren().remove(child);
-		    	//playerHand.add(newImg, column, row);
-		        break;
-		    }
-		    System.out.println(i++);
-		}
-	}
-	
+	// private void darkenLetterInHand(Character currChar, ImageView newImg) {
+	// int i = 0;
+	// for (Node child : handCharacters.getChildren()) {
+	// Integer r = GridPane.getRowIndex(child);
+	// Integer c = GridPane.getColumnIndex(child);
+	// int row = (r == null ? 0 : r);
+	// int column = (c == null ? 0 : c);
+	// if (row == 0 && column == i && (child instanceof Cell)) {
+	// Cell currSquare = (Cell) child;
+	// System.out.println(currSquare.getImage());
+	// // currSquare.getImage().setEffect(new Lighting());
+	// // playerHand.getChildren().remove(child);
+	// // playerHand.add(newImg, column, row);
+	// break;
+	// }
+	// System.out.println(i++);
+	// }
+	// }
+
 	private boolean squareClickedContainsLetter() {
 		if (firstTurn)
-			return false;	
+			return false;
 		Position currPos = new Position(letterRow, letterCol);
-		
+
 		for (int i = 0; i < enforcedPositions.getLength(); i++) {
 			if (enforcedPositions.getEntry(i).toString().equals(currPos.toString())) {
 				System.out.println("Clicked square with letter tile on it!");
@@ -687,13 +816,14 @@ public class Main extends Application {
 		boolean continuous = false;
 		int lastPositionIndex = you.getPlayerPositions().getLength() - 1;
 		Position lastPlayerPosition = you.getPlayerPositions().getEntry(lastPositionIndex);
-		
-		// 1: check adjacency (happens to check whether word is typed left-right/top-bottom
-		if ((letterRow == lastPlayerPosition.getRow() + 1 && letterCol == lastPlayerPosition.getCol()) 
+
+		// 1: check adjacency (happens to check whether word is typed
+		// left-right/top-bottom
+		if ((letterRow == lastPlayerPosition.getRow() + 1 && letterCol == lastPlayerPosition.getCol())
 				|| (letterCol == lastPlayerPosition.getCol() + 1 && letterRow == lastPlayerPosition.getRow())) {
 			adjacent = true;
 		}
-		
+
 		if (userWordIndex >= 2) {
 			int firstLetterRow = you.getPlayerPositions().getEntry(lastPositionIndex - 1).getRow();
 			int firstLetterCol = you.getPlayerPositions().getEntry(lastPositionIndex - 1).getCol();
@@ -706,21 +836,22 @@ public class Main extends Application {
 		} else if (userWordIndex < 2)
 			continuous = true;
 		// 2a: (if second letter) check that letter is on same row or same column
-		// 2b: (if more than second letter) check that letter is placed exactly on the intended
+		// 2b: (if more than second letter) check that letter is placed exactly on the
+		// intended
 		// square
 		return adjacent && continuous;
 	}
 
 	private boolean perTurnRestrictionsFollowed() {
 		// 1: (if first turn) check that one letter is on the star square
-		//if (firstTurn == true) {
-			return checkPlacementUsesAtLeastOneEnforcedPosition();
-		//}
+		// if (firstTurn == true) {
+		return checkPlacementUsesAtLeastOneEnforcedPosition();
+		// }
 		// 2: (otherwise) check that at least one letter uses letter already on board
-//		else {
-//			
-//		}
-//		return false;
+		// else {
+		//
+		// }
+		// return false;
 	}
 
 	private boolean checkPlacementUsesAtLeastOneEnforcedPosition() {
@@ -728,8 +859,7 @@ public class Main extends Application {
 		int enforcedPosLength = enforcedPositions.getLength();
 		for (int i = 0; i < playerPosLength; i++) {
 			for (int j = 0; j < enforcedPosLength; j++) {
-				if (you.getPlayerPositions().getEntry(i).toString()
-						.equals(enforcedPositions.getEntry(j).toString()))
+				if (you.getPlayerPositions().getEntry(i).toString().equals(enforcedPositions.getEntry(j).toString()))
 					return true;
 			}
 		}
@@ -737,7 +867,7 @@ public class Main extends Application {
 	}
 
 	private void makeJokersTakeLetterValue() {
-		
+
 	}
 
 	private void refreshEnforcedPositions() {
@@ -746,7 +876,7 @@ public class Main extends Application {
 		}
 	}
 
-	private void setupOKBtnActions() {
+	private void setupOKBtnActions(DataInputStream dis, DataOutputStream dos) {
 		okBtn.setDisable(true);
 		okBtn.setOnAction(e -> {
 			you.setWord(userInput.getText());
@@ -785,7 +915,8 @@ public class Main extends Application {
 				userInput.setDisable(true);
 				okBtn.setDisable(true);
 				cancelBtn.setDisable(true);
-				instructionDisplay.setText(stepPrompt());
+				enterSpectatingMode(dis, dos);
+				instructionDisplay.setText(SPECTATING_PROMPT);
 			} else if (step == 10) {
 				int selectedTileIndex = playerHand.getSelectionModel().getSelectedIndex();
 				letterBag.putBackLetter(you.getHand().remove(selectedTileIndex));
@@ -794,25 +925,27 @@ public class Main extends Application {
 				okBtn.setDisable(true);
 				cancelBtn.setDisable(true);
 				addLettersToHandFromBag(); // well, only 1 in this case
+				enterSpectatingMode(dis, dos);
 				step = 1;
-				instructionDisplay.setText(stepPrompt());
+				instructionDisplay.setText(SPECTATING_PROMPT);
 			} else if (step == 20) {
 				putBackAllPlayerTiles();
 				setOptionButtonsVisible(true);
 				okBtn.setDisable(true);
 				cancelBtn.setDisable(true);
 				addLettersToHandFromBag();
+				enterSpectatingMode(dis, dos);
 				step = 1;
-				instructionDisplay.setText(stepPrompt());
+				instructionDisplay.setText(SPECTATING_PROMPT);
 			}
 		});
 	}
-	
+
 	private void setOptionButtonsVisible(boolean b) {
 		playTurnBtn.setVisible(b);
 		exchange1Btn.setVisible(b);
 		exchangeAllBtn.setVisible(b);
-		skipTurnBtn.setVisible(b);		
+		skipTurnBtn.setVisible(b);
 	}
 
 	private void putBackAllPlayerTiles() {
@@ -823,54 +956,54 @@ public class Main extends Application {
 	}
 
 	private void setupCancelBtnActions() {
-			cancelBtn.setDisable(true);
-			cancelBtn.setOnAction(e -> {
-				if (step == 2) {
-					step = 1;
-					userInput.clear();
-					userInput.setDisable(true);
-					instructionDisplay.setText(stepPrompt());
-					okBtn.setDisable(true);
-					playTurnBtn.setVisible(true);
-					exchange1Btn.setVisible(true);
-					exchangeAllBtn.setVisible(true);
-					skipTurnBtn.setVisible(true);
-					cancelBtn.setDisable(true);
-				} else if (step == 3) {
-					step = 2;
-					userInput.setDisable(false);
-					instructionDisplay.setText(stepPrompt());
-					userWordIndex = 0;
-					placedLettersTracker.clear();
-					you.getPlayerPositions().clear();
-					you.setJokerCount(you.getActualJokerCount());
-					clearNewlyOccupiedSquares(); // ! clears letterPlacements field in Player
-	//				resetBoard();
-	//				resetGrid();
-				} else if (step == 4) {
-					step = 3;
-					instructionDisplay.setText(stepPrompt());
-					userWordIndex = 0;
-					placedLettersTracker.clear();
-					you.getPlayerPositions().clear();
-					you.setJokerCount(you.getActualJokerCount());
-					clearNewlyOccupiedSquares(); // ! clears letterPlacements field in Player
-					okBtn.setDisable(true);
-				} else if (step == 10) {
-					step = 1;
-					instructionDisplay.setText(stepPrompt());
-					okBtn.setDisable(true);
-					cancelBtn.setDisable(true);
-					setOptionButtonsVisible(true);
-				} else if (step == 20) {
-					step = 1;
-					instructionDisplay.setText(stepPrompt());
-					okBtn.setDisable(true);
-					cancelBtn.setDisable(true);
-					setOptionButtonsVisible(true);
-				}
-			});		
-		}
+		cancelBtn.setDisable(true);
+		cancelBtn.setOnAction(e -> {
+			if (step == 2) {
+				step = 1;
+				userInput.clear();
+				userInput.setDisable(true);
+				instructionDisplay.setText(stepPrompt());
+				okBtn.setDisable(true);
+				playTurnBtn.setVisible(true);
+				exchange1Btn.setVisible(true);
+				exchangeAllBtn.setVisible(true);
+				skipTurnBtn.setVisible(true);
+				cancelBtn.setDisable(true);
+			} else if (step == 3) {
+				step = 2;
+				userInput.setDisable(false);
+				instructionDisplay.setText(stepPrompt());
+				userWordIndex = 0;
+				placedLettersTracker.clear();
+				you.getPlayerPositions().clear();
+				you.setJokerCount(you.getActualJokerCount());
+				clearNewlyOccupiedSquares(); // ! clears letterPlacements field in Player
+				// resetBoard();
+				// resetGrid();
+			} else if (step == 4) {
+				step = 3;
+				instructionDisplay.setText(stepPrompt());
+				userWordIndex = 0;
+				placedLettersTracker.clear();
+				you.getPlayerPositions().clear();
+				you.setJokerCount(you.getActualJokerCount());
+				clearNewlyOccupiedSquares(); // ! clears letterPlacements field in Player
+				okBtn.setDisable(true);
+			} else if (step == 10) {
+				step = 1;
+				instructionDisplay.setText(stepPrompt());
+				okBtn.setDisable(true);
+				cancelBtn.setDisable(true);
+				setOptionButtonsVisible(true);
+			} else if (step == 20) {
+				step = 1;
+				instructionDisplay.setText(stepPrompt());
+				okBtn.setDisable(true);
+				cancelBtn.setDisable(true);
+				setOptionButtonsVisible(true);
+			}
+		});
+	}
 
 	private void refreshLetterValueOfSquares() {
 		for (int i = 0; i < you.getPlayerPositions().getLength(); i++) {
@@ -899,9 +1032,60 @@ public class Main extends Application {
 		}
 		return fullString;
 	}
-	
-	public static void main(String[] args) {
-		launch(args);
+
+	public void enterSpectatingMode(DataInputStream dis, DataOutputStream dos) {
+		setOptionButtonsVisible(false);
+		okBtn.setDisable(true);
+		cancelBtn.setDisable(true);
+		userInput.setDisable(true);
+		instructionDisplay.setText(SPECTATING_PROMPT);
+		// something that determines when this mode ends
+		String encodedStringSend = encode();
+		try {
+			dos.writeUTF(encodedStringSend);
+			// after a little while...
+			String encodedStringRcv = dis.readUTF();
+			exitSpectatingMode(encodedStringRcv);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+
+	}
+
+	public void exitSpectatingMode(String encodedString) {
+		decode(encodedString);
+		placeSquaresFromDecode();
+		setOptionButtonsVisible(true);
+		step = 1;
+	}
+
+	public void placeSquaresFromDecode() {
+		for (int i = 0; i < 15; i++) {
+			for (int j = 0; j < 15; j++) {
+				if (enforcedPositionsContainThisPosition(i, j)) {
+					Character currLetter = letterList.remove(0);
+					board.getSquares()[i][j].setOccupyingLetter(currLetter);
+					insertImageInGrid(boardGrid, i, j, "letter_" + currLetter + ".png");
+				}
+			}
+		}
+	}
+
+	private boolean enforcedPositionsContainThisPosition(int row, int col) {
+		Client c = new Client();
+		for (int i = 0; i < getRowList().getLength(); i++) {
+			if (getRowList().getEntry(i) == row && getColList().getEntry(i) == col) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+
 	}
 
 }
