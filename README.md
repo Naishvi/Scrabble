@@ -17,3 +17,16 @@
   - Player gets additional points according to letters placed and bonus squares on which they were placed, if applicable
   - Turn ends
 - Each player gets 5 turns to try and make the most points
+
+
+# Project Demo 
+## Getting Started 
+- Download the Scrabble game from github 
+- Run the Server then the 2 clients 
+- Play the game 
+
+## Features 
+- Allows a player to create a word and checks it in the dictionary 
+- Client server connection 
+- Addtional options allow the player to skip, exchange letter, and exchange word
+
