@@ -1,111 +1,97 @@
 package application;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+
+ 
+
+import java.io.DataInputStream;
+
 import java.io.DataOutputStream;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
+
 import java.net.ServerSocket;
+
 import java.net.Socket;
-import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+ 
 
-public class Server{
-	int port; 
-	Socket client; 
-	ExecutorService pool; 
-	int clientCount = 0; 
-	String clientWord;
-	ServerSocket server;
+public class Server {
 
-	public void startServer() throws IOException{
-		server = new ServerSocket(5000);
+ 
 
-		while(true) {
-			Socket connectionSocket = server.accept(); 
-			clientCount++;
-			ServerThread runnable = new ServerThread(client, clientCount, this);
-			pool.execute(runnable);
-		}
+      public static final int PORT_NUMBER = 3246;
 
-	}
-	/*public static void main(String [] args) throws Exception{
+     
 
-		Server serverObj = new Server(5000);
-		serverObj.startServer(); 
-		//while(true) {
+      public static void main(String[] args) throws IOException {
 
-		//BufferedReader fromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-		//DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream()); 
-		//Use client 1 word now to send it to client 2 word 
+             ServerSocket serverSocket = new ServerSocket(PORT_NUMBER, 2);
 
-		//}
+             System.out.println("Server running...");
 
-	}*/
-	Server(int port){
-		this.port = port; 
-		pool = Executors.newFixedThreadPool(2); // Create 2 client connection
-	}
+             System.out.println("Waiting for first player.");
+
+            
+
+             Socket socket1 = serverSocket.accept();
+
+             DataOutputStream dos1 = new DataOutputStream(socket1.getOutputStream());
+
+             DataInputStream dis1 = new DataInputStream(socket1.getInputStream());
+
+     
+
+             String player1Name = dis1.readUTF();
+
+             dos1.writeUTF("Hello " + player1Name + ". Player 2 is offline, please wait.");
+
+            
+
+             System.out.println("Server accepted " + player1Name);
+
+             System.out.println("Waiting for opponent");
+
+            
+
+             Socket socket2 = serverSocket.accept();
+
+             DataOutputStream dos2 = new DataOutputStream(socket2.getOutputStream());
+
+             DataInputStream dis2 = new DataInputStream(socket2.getInputStream());
+
+            
+
+             String player2Name = dis2.readUTF();
+
+             dos2.writeUTF("Hello " + player2Name + ". Player 1 is online.");
+
+     
+
+             System.out.println("Server accepted " + player2Name);
+
+            
+
+             System.out.println("Telling players that game can begin...");
+
+             dos1.writeUTF(player1Name + ", you can begin to play. Enjoy your Scrabble game!");
+
+             dos2.writeUTF(player2Name + ", you can begin to play. Enjoy your Scrabble game!");
+             
+             while(true) {
+             String encodedString = dis1.readUTF(); 
+             System.out.println(encodedString);
+             dos2.writeUTF(encodedString);
+             String encodedString2 = dis2.readUTF(); 
+             dos1.writeUTF(encodedString2);
+             
+             }
+             
+             
+            // dos1.writeBoolean(true);
+
+            // dos2.writeBoolean(true);
+
+      }
+
+ 
+
 }
-
-class ServerThread implements Runnable{
-	Server server = null; 
-	Socket client; 
-	BufferedReader in; 
-	PrintStream out; 
-	Scanner scan = new Scanner(System.in); 
-	int id; 
-	String s; 
-	ServerThread(Socket client, int count, Server server) throws IOException{
-		this.client = client; 
-		this.server = server; 
-		System.out.println("Connection with " + id + "established with client" + client);
-		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-		out = new PrintStream(client.getOutputStream()); 
-		
-	}
-
-	@Override
-	public void run() {
-		int x = 1; 
-		try {
-			while(true){
-				s=in.readLine();
-
-				System. out.print("Client("+id+") :"+s+"\n");
-				System.out.print("Server : ");
-				//s=stdin.readLine();
-				s=scan.nextLine();
-				if (s.equalsIgnoreCase("bye"))
-				{
-					out.println("BYE");
-					x=0;
-					System.out.println("Connection ended by server");
-					break;
-				}
-				out.println(s);
-			}
-
-
-			in.close();
-			client.close();
-			out.close();
-			if(x==0) {
-				System.out.println( "Server cleaning up." );
-				System.exit(0);
-			}
-		}
-		catch(IOException ex){
-			System.out.println("Error : "+ex);
-		}
-	}
-}
-
-
-
-
-
-
