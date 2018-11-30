@@ -22,6 +22,7 @@
 # Project Demo 
 ## Getting Started 
 - Download the Scrabble game from github 
+- Open the files in eclipse and run the program 
 - Run the Server then the 2 clients 
 - Play the game 
 
@@ -29,4 +30,7 @@
 - Allows a player to create a word and checks it in the dictionary 
 - Client server connection 
 - Addtional options allow the player to skip, exchange letter, and exchange word
+- Keeps track of the players score 
+
+## Demo 
 
